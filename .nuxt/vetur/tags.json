@@ -1,0 +1,83 @@
+{
+  "App": {
+    "description": "Auto imported from components/App.vue"
+  },
+  "AutoSpeaker": {
+    "description": "Auto imported from components/AutoSpeaker.vue"
+  },
+  "Browser": {
+    "description": "Auto imported from components/Browser.vue"
+  },
+  "Card": {
+    "description": "Auto imported from components/Card.vue"
+  },
+  "CardCreator": {
+    "description": "Auto imported from components/CardCreator.vue"
+  },
+  "CardEditor": {
+    "description": "Auto imported from components/CardEditor.vue"
+  },
+  "CardInline": {
+    "description": "Auto imported from components/CardInline.vue"
+  },
+  "CardTools": {
+    "description": "Auto imported from components/CardTools.vue"
+  },
+  "Dropdown": {
+    "description": "Auto imported from components/Dropdown.vue"
+  },
+  "EditableTextField": {
+    "description": "Auto imported from components/EditableTextField.vue"
+  },
+  "EditableTextFieldMarkdown": {
+    "description": "Auto imported from components/EditableTextFieldMarkdown.vue"
+  },
+  "FloatingText": {
+    "description": "Auto imported from components/FloatingText.vue"
+  },
+  "ImageLoader": {
+    "description": "Auto imported from components/ImageLoader.vue"
+  },
+  "RefreshHandler": {
+    "description": "Auto imported from components/RefreshHandler.vue"
+  },
+  "RemainingCardIndicator": {
+    "description": "Auto imported from components/RemainingCardIndicator.vue"
+  },
+  "ReviewGraph": {
+    "description": "Auto imported from components/ReviewGraph.vue"
+  },
+  "SetBrowser": {
+    "description": "Auto imported from components/SetBrowser.vue"
+  },
+  "SetSettings": {
+    "description": "Auto imported from components/SetSettings.vue"
+  },
+  "SetStats": {
+    "description": "Auto imported from components/SetStats.vue"
+  },
+  "SetView": {
+    "description": "Auto imported from components/SetView.vue"
+  },
+  "SingleCardStudy": {
+    "description": "Auto imported from components/SingleCardStudy.vue"
+  },
+  "StudyExtras": {
+    "description": "Auto imported from components/StudyExtras.vue"
+  },
+  "StudyExtrasJA": {
+    "description": "Auto imported from components/StudyExtrasJA.vue"
+  },
+  "StudyFrame": {
+    "description": "Auto imported from components/StudyFrame.vue"
+  },
+  "Toggle": {
+    "description": "Auto imported from components/Toggle.vue"
+  },
+  "UserAndSetPicker": {
+    "description": "Auto imported from components/UserAndSetPicker.vue"
+  },
+  "UserView": {
+    "description": "Auto imported from components/UserView.vue"
+  }
+}
