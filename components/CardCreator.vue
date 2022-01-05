@@ -194,7 +194,7 @@ export default {
         textToBaseOn,
         language: this.languageTools,
       }).then((newValues) => {
-        console.log(newValues)
+        // console.log(newValues)
         this.front = newValues.front || this.front
         this.back = newValues.back || this.back
         this.imageURL = ''

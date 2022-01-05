@@ -119,7 +119,7 @@ export const autocomplete = ({
           })
           .then((entry) => {
             const regexResult =
-              /<div id="headword-(en|es)" [^>]*><h1 [^<]*>([^<]*)<\/h1><\/div>.*<div .*quickdef[^>]*><a href="\/translate[^>]*>([^<]*)/g.exec(
+              /<div id="headword-(en|es)" [^>]*><h1 [^<]*>([^<]*)<\/h1><\/div>.*<div .*quickdef1[^>]*><a href="\/translate[^>]*>([^<]*)/g.exec(
                 entry
               )
             if (!regexResult) {

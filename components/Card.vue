@@ -24,7 +24,11 @@
         @endEdit="saveEditedCard(reverse ? 'back' : 'front', ...arguments)"
         @setImageURL="setImageURL"
       />
-      <ImageLoader :url="imageURL" v-if="imageURL && !reverse" />
+      <ImageLoader
+        :url="imageURL"
+        v-if="imageURL && !reverse"
+        @failed="setImageURL(null)"
+      />
       <StudyExtras
         v-if="reverse && settings.languageTools && forStudy"
         :text="back"

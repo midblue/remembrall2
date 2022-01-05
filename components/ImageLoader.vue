@@ -99,7 +99,7 @@
         ></animate>
       </circle>
     </svg>
-    <img :src="url" v-else>
+    <img :src="url" v-else />
   </div>
 </template>
 
@@ -138,7 +138,9 @@ export default {
         this.hide = true
         this.$emit('failed')
       }
-      img.src = url
+      if (url !== 'loading') {
+        img.src = url
+      }
     },
   },
 }

@@ -44,14 +44,33 @@
           @click="answer('again')"
         >
           Wrong
+          <span class="sub"
+            ><span class="fade">{{ msToString(0, true) }}</span></span
+          >
           <div>
             <kbd class="keyicon">1</kbd>
           </div>
         </button>
-        <button v-if="timeBonuses.ok" key="ok" @click="answer('ok')">
-          Right
+        <button v-if="timeBonuses.hard" key="hard" @click="answer('hard')">
+          Hard
+          <span class="sub"
+            ><span class="fade"
+              >~{{ msToString(timeBonuses.hard, true) }}</span
+            ></span
+          >
           <div>
             <kbd class="keyicon">2</kbd>
+          </div>
+        </button>
+        <button v-if="timeBonuses.ok" key="ok" @click="answer('ok')">
+          Right
+          <span class="sub"
+            ><span class="fade"
+              >~{{ msToString(timeBonuses.ok, true) }}</span
+            ></span
+          >
+          <div>
+            <kbd class="keyicon">3</kbd>
             <span v-if="!isMobile">/</span>
             <kbd class="keyicon">Space</kbd>
           </div>
@@ -80,7 +99,8 @@ import { msToString, getRandomImage } from '~/assets/commonFunctions'
 
 const minimumTimeMod = 30 * 60 * 1000 // 30m
 const difficultyModifiers = {
-  ok: 2,
+  ok: 4,
+  hard: 1,
   again: 0.1,
 }
 const timeIgnoreCutoff = [300, 30 * 1000] // .3s / 30s
@@ -118,6 +138,7 @@ export default {
   },
   data() {
     return {
+      msToString,
       showBack: false,
       startedCardTime: new Date(),
       revealedBackTime: new Date(),
@@ -150,19 +171,14 @@ export default {
     timeBonuses() {
       const bonuses = {
         ok: this.getTimeBonus('ok'),
+        hard: this.getTimeBonus('hard'),
         again: this.getTimeBonus('again'),
       }
       return bonuses
     },
-    formattedTimeBonuses() {
-      const bonuses = { ...this.timeBonuses }
-      for (const bonus in bonuses)
-        bonuses[bonus] = Math.ceil(bonuses[bonus] / 1000 / 60) + 'm'
-      return bonuses
-    },
   },
   watch: {
-    id(newId) {
+    id() {
       this.startedCardTime = new Date()
       this.showBack = false
       if (this.settings.autoSpeakFront) {
@@ -207,6 +223,12 @@ export default {
       window.scrollTo(0, bottomOfCardVisible)
     },
     answer(difficulty) {
+      if (this.imageURL === 'loading')
+        this.$store.commit('updateCard', {
+          id: this.id,
+          imageURL: null,
+        })
+
       this.showBack = false
       this.reviewsSoFar++
 
@@ -255,38 +277,33 @@ export default {
           : collectiveLength / lengthThreshold
 
       const bonusMultipliers = {
-        answerTime: 1,
-        maturity: 0.8,
-        successRatio: 0.8,
-        length: 0.3,
-      }
-      // TODO consider making maturity a negative multiplier so it doesn't go 4mo -> 2y -> 10y etc
+        answerTime: 0.4,
+        maturity: 0.25,
+        successRatio: 0.25,
+        length: 0.1,
+      } // adds up to 1
 
-      let newTimeMod = this.timeBonuses[difficulty]
+      console.log('base time mod:', msToString(this.timeBonuses[difficulty]))
+
+      let bonusMultiplier = 0
       for (const bonus in bonuses) {
         console.log(
           bonus + ' bonus:',
-          (bonuses[bonus] * bonusMultipliers[bonus]).toFixed(2)
+          (bonuses[bonus] * 100).toFixed(0) +
+            '% (+' +
+            (bonuses[bonus] * bonusMultipliers[bonus] * 100).toFixed(0) +
+            '% adjusted)'
         )
-        newTimeMod +=
-          bonuses[bonus] *
-          bonusMultipliers[bonus] *
-          this.timeBonuses[difficulty]
+        bonusMultiplier += bonuses[bonus] * bonusMultipliers[bonus]
       }
 
-      // *"overdue" cards reduce repeat time, multiplies from .2 to 1
-      const overdueMultiplier =
-        1 -
-        Math.min(
-          0.8,
-          (Date.now() - (this.nextReview || Date.now())) /
-            (1000 * 60 * 60 * 24 * 30)
-        )
-      console.log('overdue multiplier:', overdueMultiplier.toFixed(2))
-      newTimeMod *= overdueMultiplier
+      console.log('final bonus multiplier:', bonusMultiplier)
+      let newTimeMod =
+        this.timeBonuses[difficulty] / 2 +
+        this.timeBonuses[difficulty] * bonusMultiplier // final mod can be from .5 to 1.5 of the base bonus
 
       newTimeMod = Math.floor(newTimeMod)
-      console.log('pre-length-scaling time mod:', msToString(newTimeMod))
+      console.log('pre-overlong-scaled time mod:', msToString(newTimeMod))
 
       // if timeMod is very long, doesn't let it go to like 10y so easily
       newTimeMod = Math.floor(
@@ -296,6 +313,10 @@ export default {
       )
       if (newTimeMod < -1000) newTimeMod = 3000000000000 // it passsed the cap
       if (newTimeMod < 1) newTimeMod = 1
+
+      // don't go below the minimum time mod
+      if (difficulty !== 'again' && newTimeMod < minimumTimeMod)
+        newTimeMod = minimumTimeMod
 
       // check for once-per-day setting
       const oncePerDayTimeMod = 10 * 60 * 60 * 1000 /* 10h */
@@ -331,8 +352,23 @@ export default {
       let newTimeMod =
         (!this.timeMod || isNaN(this.timeMod) ? 0 : this.timeMod) *
         difficultyModifiers[difficulty]
-      if (newTimeMod < minimumTimeMod) newTimeMod = minimumTimeMod
       if (difficulty === 'again') newTimeMod = 0
+
+      // * "overdue" cards reduce repeat time, multiplies from .2 to 1
+      const overdueMultiplier =
+        1 -
+        Math.min(
+          0.8,
+          (Date.now() - (this.nextReview || Date.now())) /
+            (1000 * 60 * 60 * 24 * 30)
+        )
+      if (difficulty === 'again')
+        console.log('overdue multiplier:', overdueMultiplier.toFixed(2))
+      newTimeMod *= overdueMultiplier
+
+      if (difficulty !== 'again' && newTimeMod < minimumTimeMod)
+        newTimeMod = minimumTimeMod
+
       return newTimeMod
     },
     keyDown(event) {
@@ -354,15 +390,12 @@ export default {
 
       if (!this.isStudying || this.isEditingText) return
       if (event.key === '1' && this.showBack) this.answer('again')
-      else if (event.key === ' ') {
+      if (event.key === '2' && this.showBack) this.answer('hard')
+      else if (event.key === ' ' || event.key === 'Enter') {
         event.preventDefault()
         event.stopPropagation()
         !this.showBack ? this.showBackAction() : this.answer('ok')
-      } else if (event.key === 'Enter') {
-        event.preventDefault()
-        event.stopPropagation()
-        !this.showBack ? this.showBackAction() : this.answer('ok')
-      } else if (event.key === '2' && this.showBack) this.answer('ok')
+      } else if (event.key === '3' && this.showBack) this.answer('ok')
       else if (event.key === 'p') this.$emit('postpone')
     },
     keyUp(event) {

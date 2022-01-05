@@ -361,7 +361,7 @@ export default {
     finishedCurrentCard(timeMod) {
       this.cardsToStudy.shift()
       if (timeMod === undefined) return
-      const text = timeMod ? '+' + msToString(timeMod) : 'Again!'
+      const text = timeMod > 1 ? '+' + msToString(timeMod) : 'Again!'
       this.displayTimeMod = null
       this.$nextTick(() => (this.displayTimeMod = text))
       this.preloadNextImage()

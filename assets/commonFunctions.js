@@ -1,19 +1,5 @@
 const keys = require('~/keys.js')
 
-exports.msToString = function (ms) {
-  ms = parseInt(ms)
-  if (ms < 1000) return '0s'
-  else if (ms < 1000 * 60) return Math.round(ms / 1000) + 's'
-  else if (ms < 1000 * 60 * 60) return Math.round(ms / 1000 / 60) + 'm'
-  else if (ms < 1000 * 60 * 60 * 24)
-    return Math.round(ms / 1000 / 60 / 60) + 'h'
-  else if (ms < 1000 * 60 * 60 * 24 * 30)
-    return Math.round(ms / 1000 / 60 / 60 / 24) + 'd'
-  else if (ms < 1000 * 60 * 60 * 24 * 30 * 12)
-    return Math.round(ms / 1000 / 60 / 60 / 24 / 30) + 'mo'
-  else return Math.round(ms / 1000 / 60 / 60 / 24 / 365) + 'y'
-}
-
 function findImagesForKeyword(keyword, count = 10, offset = 0) {
   // const urlBase = `https://www.googleapis.com/customsearch/v1?imgSize=large&imgType=photo&searchType=image&key=${keys.GOOGLE}&cx=${keys.GSEARCH}`
   const query = encodeURI(keyword)
@@ -121,4 +107,40 @@ exports.getNumberDueInSet = function (set) {
     0
   )
   return dueInDeck + Math.min(maxNew - Math.min(newToday, maxNew), newInDeck)
+}
+
+exports.msToString = function (ms = 0, short = true) {
+  const negativePrefix = ms < 0 ? `-` : ``
+  if (negativePrefix) ms *= -1
+  let remainingSeconds = Math.floor(ms / 1000)
+
+  let years = Math.floor(remainingSeconds / (60 * 60 * 24 * 365))
+  remainingSeconds -= years * 60 * 60 * 24 * 365
+
+  let days = Math.floor(remainingSeconds / (60 * 60 * 24))
+  remainingSeconds -= days * 60 * 60 * 24
+
+  let hours = Math.floor(remainingSeconds / (60 * 60))
+  remainingSeconds -= hours * 60 * 60
+
+  let minutes = Math.floor(remainingSeconds / 60)
+  remainingSeconds -= minutes * 60
+  // if (minutes < 10 && hours > 0) minutes = `0${minutes}`
+
+  let seconds = remainingSeconds
+  if (seconds < 10 && minutes > 0) seconds = `0${seconds}`
+
+  if (!years && !days && !hours && !minutes)
+    return `${negativePrefix}${seconds}s`
+  if (!years && !days && !hours)
+    return `${negativePrefix}${minutes}${
+      !short && seconds ? `:${seconds}` : `m`
+    }`
+  if (!years && !days)
+    return `${negativePrefix}${hours}h${
+      !short && minutes ? ` ${minutes}m` : ``
+    }`
+  if (!years)
+    return `${negativePrefix}${days}d${!short && hours ? ` ${hours}h` : ``}`
+  return `${negativePrefix}${years}y${!short && days ? ` ${days}d` : ``}`
 }
