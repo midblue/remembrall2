@@ -11,6 +11,11 @@
         @next="tab"
         @setImageURL="setImageURL"
       />
+      <div v-if="examples" class="examplefield" @click="examples = undefined">
+        <div v-for="e in examples" :key="e.split('@')[0]">
+          {{ e.split('@')[0] }}
+        </div>
+      </div>
       <div v-if="imageURL" class="imagecontainer" @click="imageURL = ''">
         <ImageLoader :url="imageURL" />
       </div>
@@ -23,6 +28,11 @@
         @prev="shiftTab"
         @setImageURL="setImageURL"
       />
+      <div v-if="examples" class="examplefield">
+        <div v-for="e in examples" :key="e.split('@')[1]">
+          {{ e.split('@')[1] }}
+        </div>
+      </div>
     </div>
 
     <FloatingText :text="floatText" offset="-30" />
@@ -79,6 +89,7 @@ export default {
       front: '',
       back: '',
       imageURL: '',
+      examples: undefined,
       metaDown: false,
       floatText: '',
       isDuplicate: false,
@@ -122,6 +133,7 @@ export default {
         front: this.front,
         back: this.back,
         imageURL: this.imageURL,
+        examples: this.examples,
         nextReview: 0,
         set: parseInt(this.$store.state.currentSetId),
       })
@@ -131,6 +143,7 @@ export default {
         this.front = ''
         this.back = ''
         this.imageURL = ''
+        this.examples = undefined
         this.isDuplicate = false
         this.setFocus = null
         this.$nextTick(() => (this.setFocus = 'front'))
@@ -197,8 +210,10 @@ export default {
         // console.log(newValues)
         this.front = newValues.front || this.front
         this.back = newValues.back || this.back
-        this.imageURL = ''
-        if (newValues.shouldAutoSetImage) this.autoSetImage()
+        this.imageURL = newValues.image || this.imageURL || ''
+        this.examples = newValues.examples || this.examples || undefined
+        if (newValues.shouldAutoSetImage && !newValues.image)
+          this.autoSetImage()
         this.loadingAutocomplete = false
       })
     },
@@ -239,6 +254,14 @@ export default {
     }
   }
 
+  .examplefield {
+    font-size: 0.8rem;
+    color: rgba(black, 0.6);
+    background: #f8f8f8;
+    text-align: center;
+    padding: 0em 2em 1em 2em;
+    line-height: 1.2;
+  }
   .textfield {
     background: #f8f8f8;
     padding: 50px 20px;

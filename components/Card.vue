@@ -24,6 +24,11 @@
         @endEdit="saveEditedCard(reverse ? 'back' : 'front', ...arguments)"
         @setImageURL="setImageURL"
       />
+      <div v-if="examples" class="examplefield">
+        <div v-for="e in examples" :key="e.split('@')[0]">
+          {{ e.split('@')[0] }}
+        </div>
+      </div>
       <ImageLoader
         :url="imageURL"
         v-if="imageURL && !reverse"
@@ -51,6 +56,11 @@
           @endEdit="saveEditedCard(reverse ? 'front' : 'back', ...arguments)"
           @setImageURL="setImageURL"
         />
+        <div v-if="examples" class="examplefield">
+          <div v-for="e in examples" :key="e.split('@')[1]">
+            {{ e.split('@')[1] }}
+          </div>
+        </div>
         <ImageLoader :url="imageURL" v-if="imageURL && reverse" />
         <StudyExtras
           v-if="!reverse && settings.languageTools && forStudy"
@@ -104,6 +114,7 @@ export default {
       default: false,
     },
     imageURL: {},
+    examples: {},
     forStudy: {
       default: true,
     },
@@ -132,6 +143,7 @@ export default {
     },
   },
   mounted() {
+    console.log(this.examples)
     window.addEventListener('keydown', this.keyDown)
     window.addEventListener('keyup', this.keyUp)
   },
@@ -195,6 +207,14 @@ export default {
   border-bottom-left-radius: 10px;
 }
 
+.examplefield {
+  font-size: 0.8rem;
+  color: rgba(black, 0.6);
+  background: #f8f8f8;
+  text-align: center;
+  padding: 0em 2em 1em 2em;
+  line-height: 1.2;
+}
 .textfield {
   padding: 45px 30px;
   font-size: 1.5rem;

@@ -22,6 +22,7 @@
       :show-back="showBack"
       :set="set"
       :image-u-r-l="imageURL"
+      :examples="examples"
       @showBack="showBackAction"
     />
 
@@ -126,6 +127,7 @@ export default {
       default: 0,
     },
     imageURL: {},
+    examples: {},
     created: {
       default: () => new Date().getTime(),
     },

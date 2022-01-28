@@ -14,6 +14,12 @@
     <a target="_blank" :href="pronunciationLink" class="sub">Native</a
     ><span> ・ </span>
     <a target="_blank" :href="translationLink" class="sub">Translation</a>
+    <template v-if="definitionLink"
+      ><span> ・ </span>
+      <a target="_blank" :href="definitionLink" class="sub"
+        >Definition</a
+      ></template
+    >
   </div>
 </template>
 
@@ -57,6 +63,10 @@ export default {
     },
     translationLink() {
       return `https://translate.google.com/#${this.settings.languageTools}/en/${this.searchString}`
+    },
+    definitionLink() {
+      if (this.settings.languageTools === 'es')
+        return `https://www.spanishdict.com/translate/${this.searchString}`
     },
   },
   watch: {

@@ -137,7 +137,24 @@ export const autocomplete = ({
 
             const [full, primaryTextLanguage, word, definition] = regexResult
 
-            console.log(primaryTextLanguage, word, definition)
+            // console.log(primaryTextLanguage, word, definition)
+
+            const image = /<img class="thumbnailImage.+? src="([^"]*)"/g.exec(
+              entry
+            )?.[1]
+
+            let examples
+            let example =
+              /<span class="exampleFirstHalf[^\s]+ lang="([^"]+)">([^<]*)<\/span>.*?<span class="exampleSecondHalf[^\s]+ lang="([^"]+)">([^<]*)<\/span>/g.exec(
+                entry
+              )
+            if (example) {
+              const [full, lang1, text1, lang2, text2] = example
+              if (!examples) examples = []
+              if (lang1 === 'en') examples.push(`${text1}@${text2}`)
+              else examples.push(`${text2}@${text1}`)
+            }
+
             const front = basedOnFrontText ? word : definition
             const back = !basedOnFrontText ? word : definition
             const shouldAutoSetImage =
@@ -146,6 +163,8 @@ export const autocomplete = ({
             resolve({
               front,
               back,
+              image,
+              examples,
               shouldAutoSetImage,
             })
           })
