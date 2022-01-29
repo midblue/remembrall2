@@ -212,12 +212,21 @@ export default {
         this.back = newValues.back || this.back
         this.imageURL = newValues.image || this.imageURL || ''
         this.examples = newValues.examples || this.examples || undefined
+        if (this.examples)
+          this.examples = this.examples.map((e) => decodeHtmlEntities(e))
         if (newValues.shouldAutoSetImage && !newValues.image)
           this.autoSetImage()
         this.loadingAutocomplete = false
       })
     },
   },
+}
+
+const decodeHtmlEntities = function (str) {
+  return str
+    .replace(/&#x27;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, '&')
 }
 </script>
 

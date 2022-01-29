@@ -3,7 +3,7 @@
     <AutoSpeaker
       v-if="settings.languageTools"
       :text="textToSpeak"
-      :language="settings.languageTools"
+      :language="spokenLanguage"
     />
     <Card
       :id="id"
@@ -169,6 +169,13 @@ export default {
     },
     isNewCard() {
       return !this.totalReviews || this.totalReviews === 0
+    },
+    spokenLanguage() {
+      return this.settings.autoSpeak
+        ? this.isStudying && this.showBack
+          ? this.settings.languageTools
+          : 'en'
+        : this.settings.languageTools
     },
     timeBonuses() {
       const bonuses = {
@@ -353,7 +360,8 @@ export default {
     getTimeBonus(difficulty) {
       let newTimeMod =
         (!this.timeMod || isNaN(this.timeMod) ? 0 : this.timeMod) *
-        difficultyModifiers[difficulty]
+        difficultyModifiers[difficulty] *
+        (this.settings.reviewIntervalMultiplier || 1)
       if (difficulty === 'again') newTimeMod = 0
 
       // * "overdue" cards reduce repeat time, multiplies from .2 to 1

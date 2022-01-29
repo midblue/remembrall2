@@ -143,7 +143,6 @@ export default {
     },
   },
   mounted() {
-    console.log(this.examples)
     window.addEventListener('keydown', this.keyDown)
     window.addEventListener('keyup', this.keyUp)
   },

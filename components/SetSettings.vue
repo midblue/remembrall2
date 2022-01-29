@@ -15,9 +15,9 @@
       <p v-if="!settings.autoAddNew">
         <EditableTextField
           class="visibletextfield marright"
-          :text="
-            `${settings.maxNewPerDay === 0 ? 0 : settings.maxNewPerDay || 10}`
-          "
+          :text="`${
+            settings.maxNewPerDay === 0 ? 0 : settings.maxNewPerDay || 10
+          }`"
           :lineBreaksAllowed="false"
           @endEdit="updateMaxNewPerDay"
         />
@@ -27,13 +27,9 @@
       <p>
         <EditableTextField
           class="visibletextfield marright"
-          :text="
-            `${
-              settings.maxReviewsPerDay === 0
-                ? 0
-                : settings.maxReviewsPerDay || 0
-            }`
-          "
+          :text="`${
+            settings.maxReviewsPerDay === 0 ? 0 : settings.maxReviewsPerDay || 0
+          }`"
           :lineBreaksAllowed="false"
           @endEdit="updateMaxReviewsPerDay"
         />
@@ -74,9 +70,9 @@
       />
 
       <select v-model="selectedLanguageTools" class="marright">
-        <option v-for="(language, key) in languages" :key="key" :value="key">{{
-          language
-        }}</option>
+        <option v-for="(language, key) in languages" :key="key" :value="key">
+          {{ language }}
+        </option>
       </select>
       <b>Language Tools</b>
 
@@ -115,6 +111,20 @@
         <b>Speech Speed: {{ Math.round(displaySpeechSpeed) }}</b>
       </template>
 
+      <input
+        type="range"
+        min="1"
+        max="4"
+        step=".1"
+        key="reviewinterval"
+        class="slider"
+        v-model="reviewIntervalMultiplier"
+      />
+      <b
+        >Review Interval Multiplier:
+        {{ Math.round(reviewIntervalMultiplier * 10) / 10 }}</b
+      >
+
       <!--
         <Toggle
           key="pro"
@@ -150,7 +160,9 @@ export default {
     return {
       selectedLanguageTools: null,
       displaySpeechSpeed: 4,
+      reviewIntervalMultiplier: 1,
       speechSpeedUpdateTimer: null,
+      reviewInterviewMultiplierUpdateTimer: null,
       languages: {
         none: 'None',
         ar: 'Arabic',
@@ -179,6 +191,7 @@ export default {
   mounted() {
     this.selectedLanguageTools = this.settings.languageTools || 'none'
     this.displaySpeechSpeed = (this.settings.speechSpeed - 0.5) * 9 + 1 || 4 // .5 - 1.5 -> 1 - 10
+    this.reviewIntervalMultiplier = this.settings.reviewIntervalMultiplier || 1
   },
   beforeDestroy() {},
   watch: {
@@ -193,7 +206,17 @@ export default {
           this.updateSettings({
             speechSpeed: (this.displaySpeechSpeed - 1) / 9 + 0.5,
           }),
-        1000,
+        1000
+      )
+    },
+    reviewIntervalMultiplier() {
+      clearTimeout(this.reviewInterviewMultiplierUpdateTimer)
+      this.reviewInterviewMultiplierUpdateTimer = setTimeout(
+        () =>
+          this.updateSettings({
+            reviewIntervalMultiplier: this.reviewIntervalMultiplier,
+          }),
+        1000
       )
     },
   },
@@ -205,7 +228,7 @@ export default {
             this.currentSet.name
           }" with ${
             this.currentSet.cards ? this.currentSet.cards.length : 0
-          } cards?`,
+          } cards?`
         )
       ) {
         this.$store.commit('deleteSet', this.currentSet.id)
@@ -235,7 +258,7 @@ export default {
           ' ' +
           new Date().toLocaleDateString() +
           ' ' +
-          new Date().toLocaleTimeString(),
+          new Date().toLocaleTimeString()
       )
     },
   },
@@ -256,7 +279,7 @@ function downloadObjectAsJson(exportObj, exportName) {
 
 <style lang="scss" scoped>
 .settingslist {
-  max-width: 300px;
+  max-width: 400px;
   margin: 0 auto;
   margin-top: 20px;
 

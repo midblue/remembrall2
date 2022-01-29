@@ -22,7 +22,7 @@ export default {
   },
   watch: {
     language(newLang) {
-      this.speaker.lang = newLang
+      this.spawnSpeaker()
     },
     text(newText) {
       if (newText) this.speakWord()
@@ -35,6 +35,15 @@ export default {
       this.speaker.lang = this.language
       this.speaker.volume = 0.4
       this.speaker.rate = this.settings.speechSpeed || 0.8
+      const possibleVoices = window.speechSynthesis
+        .getVoices()
+        .filter((v) => v.lang.split('-')[0].toLowerCase() === this.language)
+
+      if (this.language !== 'es')
+        this.speaker.voice = possibleVoices.find((v) =>
+          v.name.startsWith('Google ')
+        )
+      // console.log(possibleVoices, this.speaker.voice)
     },
     speakWord() {
       this.spawnSpeaker()
