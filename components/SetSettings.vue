@@ -97,9 +97,7 @@
         "
       />
 
-      <template
-        v-if="selectedLanguageTools && selectedLanguageTools !== 'none'"
-      >
+      <div v-if="selectedLanguageTools && selectedLanguageTools !== 'none'">
         <input
           type="range"
           min="1"
@@ -109,21 +107,23 @@
           v-model="displaySpeechSpeed"
         />
         <b>Speech Speed: {{ Math.round(displaySpeechSpeed) }}</b>
-      </template>
+      </div>
 
-      <input
-        type="range"
-        min="1"
-        max="4"
-        step=".1"
-        key="reviewinterval"
-        class="slider"
-        v-model="reviewIntervalMultiplier"
-      />
-      <b
-        >Review Interval Multiplier:
-        {{ Math.round(reviewIntervalMultiplier * 10) / 10 }}</b
-      >
+      <div>
+        <input
+          type="range"
+          min="1"
+          max="4"
+          step=".1"
+          key="reviewinterval"
+          class="slider"
+          v-model="reviewIntervalMultiplier"
+        />
+        <b
+          >Review Interval Multiplier:
+          {{ Math.round(reviewIntervalMultiplier * 10) / 10 }}</b
+        >
+      </div>
 
       <!--
         <Toggle
