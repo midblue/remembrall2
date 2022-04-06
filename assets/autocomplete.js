@@ -139,13 +139,13 @@ export const autocomplete = ({
 
             // console.log(primaryTextLanguage, word, definition)
 
-            const image = /<img class="thumbnailImage.+? src="([^"]*)"/g.exec(
-              entry
-            )?.[1]
+            const image = /<img .+? src="([^"]+)"/g.exec(entry)?.[1]
+            console.log(image)
 
             let examples
             let example =
-              /<span class="exampleFirstHalf[^\s]+ lang="([^"]+)">([^<]*)<\/span>.*?<span class="exampleSecondHalf[^\s]+ lang="([^"]+)">([^<]*)<\/span>/g.exec(
+              // /<span class="exampleFirstHalf[^\s]+ lang="([^"]+)">([^<]*)<\/span>.*?<span class="exampleSecondHalf[^\s]+ lang="([^"]+)">([^<]*)<\/span>/
+              /<div class=".*?"><span class=".*?" lang="([^"]+)">([^<]*)<\/span><span class=".*?" lang="([^"]+)">([^<]*)<\/span><\/div>/g.exec(
                 entry
               )
             if (example) {

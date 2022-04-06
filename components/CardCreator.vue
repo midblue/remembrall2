@@ -128,15 +128,18 @@ export default {
   methods: {
     newCard() {
       if ((!this.front && !this.imageURL) || !this.back) return
-      this.$store.commit('addCard', {
+      const newCard = {
         id: Date.now(),
         front: this.front,
         back: this.back,
-        imageURL: this.imageURL,
-        examples: this.examples,
         nextReview: 0,
         set: parseInt(this.$store.state.currentSetId),
-      })
+      }
+      // * firestore DOES NOT like getting undefined as a value
+      if (this.examples) newCard.examples = this.examples
+      if (this.imageURL) newCard.imageURL = this.imageURL
+
+      this.$store.commit('addCard', newCard)
       this.floatText = 'Card added.'
       setTimeout(() => (this.floatText = ''), 1500)
       this.$nextTick(() => {
@@ -207,7 +210,7 @@ export default {
         textToBaseOn,
         language: this.languageTools,
       }).then((newValues) => {
-        // console.log(newValues)
+        console.log(newValues)
         this.front = newValues.front || this.front
         this.back = newValues.back || this.back
         this.imageURL = newValues.image || this.imageURL || ''

@@ -37,7 +37,11 @@ export function setSet(username, newSet) {
       db,
       `${userCollectionName}/${username}/${setCollectionName}/${newSet.id}`
     )
-    await setDoc(docRef, newSet)
+    try {
+      await setDoc(docRef, newSet)
+    } catch (e) {
+      console.log('error', e)
+    }
     resolve('set set success!')
   })
 }
@@ -48,7 +52,11 @@ export function updateSet(username, newSet) {
       db,
       `${userCollectionName}/${username}/${setCollectionName}/${newSet.id}`
     )
-    await updateDoc(docRef, newSet)
+    try {
+      await updateDoc(docRef, newSet)
+    } catch (e) {
+      console.log('failed to update set', e)
+    }
     resolve('update set success!')
   })
 }

@@ -1,0 +1,22 @@
+.textcenter {
+  text-align: center;
+}
+.textright {
+  text-align: right;
+}
+
+.sub {
+  opacity: 0.7;
+  font-size: 0.85em;
+}
+.fade {
+  opacity: 0.7;
+}
+.sub.fade {
+  opacity: 0.5;
+}
+
+.fakelink {
+  text-decoration: underline;
+  cursor: pointer;
+}

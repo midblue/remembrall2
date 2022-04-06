@@ -159,7 +159,7 @@ export default () => {
             state.currentUser,
             {
               id: state.currentSetId,
-              cards: state.setList[state.currentSetId].cards,
+              cards: newCards,
               lastUpdated: state.setList[state.currentSetId].lastUpdated,
             },
             `adding card`
@@ -208,13 +208,16 @@ export default () => {
           state.currentSetId
         ].cards.findIndex((c) => c.id === card.id)
         // update card data
-        if (foundCardIndex !== undefined)
-          for (const param in card)
-            Vue.set(
-              state.setList[state.currentSetId].cards[foundCardIndex],
-              param,
-              card[param]
-            )
+        if (foundCardIndex !== undefined) {
+          const existingCard =
+            state.setList[state.currentSetId].cards[foundCardIndex]
+          for (const param in card) {
+            Vue.set(existingCard, param, card[param])
+          }
+          // * firestore DOES NOT like getting undefined as a value
+          for (let key in existingCard)
+            if (existingCard[key] === undefined) delete existingCard[key]
+        }
         // update newToday, reviewsToday
         if (
           new Date(state.setList[state.currentSetId].lastUpdated).getDate() !==
@@ -336,17 +339,17 @@ export default () => {
           }
 
           // get all sets from response
-          const setObject = {}
+          const setsFromDb = {}
           docs.forEach((doc) => {
             const set = doc.data()
             // if (!set.lastUpdated) return
-            setObject[set.id] = set
+            setsFromDb[set.id] = set
           })
 
           // just until everyone has this updated, give each card a set prop
-          for (const set in setObject) {
-            if (!setObject[set].cards) continue
-            setObject[set].cards = setObject[set].cards.map((card) => ({
+          for (const set in setsFromDb) {
+            if (!setsFromDb[set].cards) continue
+            setsFromDb[set].cards = setsFromDb[set].cards.map((card) => ({
               ...card,
               set: parseInt(set),
             }))
@@ -357,15 +360,15 @@ export default () => {
             console.log('first')
             // alert('new user')
             dbManager.newUser(username)
-            // if (Object.keys(setObject).length === 0) {
-            //   setObject = newSetObject()
-            //   dbManager.setSet(username, setObject[Object.keys(setObject)[0]])
+            // if (Object.keys(setsFromDb).length === 0) {
+            //   setsFromDb = newSetObject()
+            //   dbManager.setSet(username, setsFromDb[Object.keys(setsFromDb)[0]])
             // }
           }
 
           // refresh
           if (!empty && username === state.currentUser) {
-            for (const id in setObject) {
+            for (const id in setsFromDb) {
               if (!state.setList[id]) {
                 console.log(
                   'Deck ' +
@@ -375,24 +378,35 @@ export default () => {
               }
               // if something in these sets has been updated elsewhere
               else if (
-                setObject[id].lastUpdated < state.setList[id].lastUpdated
+                setsFromDb[id].lastUpdated < state.setList[id].lastUpdated
               ) {
-                alert(`OLD SET IN DATABASE. Dumped set ${id} to localStorage.`)
-                storage.set(`${id}`, state.setList[id].cards)
-                console.log()
-                console.log(setObject[id], state.setList[id])
+                // const ignoreDatabaseCopy = confirm(
+                //   `OLD VERSION OF SET ${setsFromDb[id].name} IN DATABASE. Skip update from database? (Dumped database copy to localStorage)`
+                // )
+                storage.set(`${id}`, setsFromDb[id].cards)
+                console.log(
+                  `old version of set ${setsFromDb[id].name} in database. skipping update from database.`,
+                  setsFromDb[id].lastUpdated,
+                  state.setList[id].lastUpdated,
+                  setsFromDb[id],
+                  state.setList[id]
+                )
+                setsFromDb[id] = state.setList[id]
+                // if (ignoreDatabaseCopy) {
+                //   console.log('overwriting')
+                // }
               }
             }
           }
 
           // finish up
           commit('setUsername', username)
-          commit('setSetList', setObject)
+          commit('setSetList', setsFromDb)
           commit(
             'setCurrentSetId',
-            setObject[storage.get('currentSetId')]
+            setsFromDb[storage.get('currentSetId')]
               ? storage.get('currentSetId')
-              : Object.keys(setObject)[0]
+              : Object.keys(setsFromDb)[0]
           )
           commit('setPauseDbSets', false)
         })

@@ -142,6 +142,10 @@
       <div>Click your set's name (above) to edit it.</div>
       <button @click="downloadSet">Download Set</button>
       <button @click="deleteSet">Delete Set</button>
+      <br /><br /><br />
+      <div class="sub textcenter fakelink" @click="downloadSetFromLocalStorage">
+        Download Set from Local Storage
+      </div>
     </div>
   </div>
 </template>
@@ -149,6 +153,7 @@
 <script>
 import EditableTextField from './EditableTextField'
 import Toggle from './Toggle'
+import { get } from '../assets/storage'
 
 export default {
   props: {},
@@ -254,6 +259,16 @@ export default {
     downloadSet() {
       downloadObjectAsJson(
         this.currentSet,
+        this.currentSet.name +
+          ' ' +
+          new Date().toLocaleDateString() +
+          ' ' +
+          new Date().toLocaleTimeString()
+      )
+    },
+    downloadSetFromLocalStorage() {
+      downloadObjectAsJson(
+        get(`${this.currentSet.id}`),
         this.currentSet.name +
           ' ' +
           new Date().toLocaleDateString() +

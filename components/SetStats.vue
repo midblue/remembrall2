@@ -59,7 +59,12 @@ export default {
     newCards() {
       return this.currentSet.cards.reduce(
         (total, card) =>
-          total + (!card.totalReviews || card.totalReviews === 0 ? 1 : 0),
+          total +
+          (card.suspended
+            ? 0
+            : !card.totalReviews || card.totalReviews === 0
+            ? 1
+            : 0),
         0
       )
     },

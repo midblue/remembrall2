@@ -20,6 +20,8 @@
           ref="usernameInput"
           v-model="inputUsername"
           class="username"
+          autocorrect="off"
+          autocapitalize="off"
           placeholder="username"
         />
       </div>
