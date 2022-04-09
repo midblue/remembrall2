@@ -139,7 +139,9 @@ export const autocomplete = ({
 
             // console.log(primaryTextLanguage, word, definition)
 
-            const image = /<img .+? src="([^"]+)"/g.exec(entry)?.[1]
+            const image = /<img.+? src="([^"]+dictionary-images[^"]+)"/g.exec(
+              entry
+            )?.[1]
             console.log(image)
 
             let examples
