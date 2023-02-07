@@ -232,7 +232,7 @@ export default {
       }
     },
     checkClickToClose(e) {
-      if (!e.path.includes(this.$refs.mainButton)) this.setPickerOpen = false
+      if (!(e.composedPath ? e.composedPath() : e.path).includes(this.$refs.mainButton)) this.setPickerOpen = false
     },
     uploaded(e) {
       const file = e.target.files[0]
@@ -259,7 +259,7 @@ export default {
   padding-top: 3px;
   // transition: 0.5s;
   position: relative;
-  z-index: 10;
+  z-index: 12;
   // box-shadow: inset 0 -30px 30px -30px rgba(black, 0.1);
 
   @media (max-width: 768px) {

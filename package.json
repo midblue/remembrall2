@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "nuxt",
     "generate": "nuxt generate",
-    "golive": "npm run generate && \\cp -a ./dist/ ../personalsite2018/docs/remembrall && \\cp -a ./dist/ ../personalsite2018/static/remembrall && cd ../personalsite2018 && git add . && git commit -m \"Updated Remembrall\" && git push && cd ../remembrall-nuxt"
+    "golive": "npm run generate && \\cp -a ./dist/ ../personalsite2/dist/remembrall && \\cp -a ./dist/ ../personalsite2/static/remembrall && cd ../personalsite2 && git pull && git add . && git commit -m \"Updated Remembrall\" && git push && cd ../remembrall-nuxt"
   },
   "dependencies": {
     "core-js": "^3.15.1",

@@ -2,6 +2,7 @@
   <div class="cardcreator" :class="{ loading: loadingAutocomplete }">
     <div class="cardframe">
       <EditableTextFieldMarkdown
+        ref="front"
         v-model="front"
         class="textfield front"
         :class="{ duplicate: isDuplicate }"
@@ -20,6 +21,7 @@
         <ImageLoader :url="imageURL" />
       </div>
       <EditableTextFieldMarkdown
+        ref="back"
         v-model="back"
         class="textfield back"
         :focus="setFocus === 'back'"
@@ -119,13 +121,29 @@ export default {
     window.addEventListener('keydown', this.keyDown)
     window.addEventListener('keyup', this.keyUp)
     this.$store.commit('setAppState', 'addCard')
+    window.addEventListener('focus', this.focus)
+    window.addEventListener('blur', this.blur)
   },
   beforeDestroy() {
     window.removeEventListener('keydown', this.keyDown)
     window.removeEventListener('keyup', this.keyUp)
     this.$store.commit('setIsEditingText', false)
+    window.removeEventListener('focus', this.focus)
+    window.removeEventListener('blur', this.blur)
   },
   methods: {
+    focus() {
+      this.$refs.front.$el.blur()
+      this.$refs.back.$el.blur()
+      this.$store.commit('setIsEditingText', false)
+      window.getSelection().removeAllRanges()
+    },
+    blur() {
+      this.$refs.front.$el.blur()
+      this.$refs.back.$el.blur()
+      this.$store.commit('setIsEditingText', false)
+      window.getSelection().removeAllRanges()
+    },
     newCard() {
       if ((!this.front && !this.imageURL) || !this.back) return
       const newCard = {

@@ -13,9 +13,9 @@
         <select v-model="sortBy">
           <option value="newest">{{ isMobile ? '' : 'Sort by ' }}Newest</option>
           <option value="oldest">{{ isMobile ? '' : 'Sort by ' }}Oldest</option>
-          <option value="sets" v-if="allPresentSets.length > 1"
-            >{{ isMobile ? 'By ' : 'Sort by ' }}Set</option
-          >
+          <option value="sets" v-if="allPresentSets.length > 1">
+            {{ isMobile ? 'By ' : 'Sort by ' }}Set
+          </option>
         </select>
         <select v-model="typeFilter">
           <option value="all">All Cards</option>
@@ -28,9 +28,9 @@
         </select>
         <select v-model="setFilter" v-if="allPresentSets.length > 1">
           <option value="all">All Sets</option>
-          <option v-for="set in allPresentSets" :key="set.id" :value="set.id">{{
-            set.name
-          }}</option>
+          <option v-for="set in allPresentSets" :key="set.id" :value="set.id">
+            {{ set.name }}
+          </option>
         </select>
       </div>
 
@@ -40,11 +40,9 @@
             Deselect{{ isMobile ? '' : ' All' }}
           </button>
           <Dropdown
-            :label="
-              `Move ${!isMobile ? selectedCards.length : ''} Card${
-                selectedCards.length === 1 ? '' : 's'
-              }`
-            "
+            :label="`Move ${!isMobile ? selectedCards.length : ''} Card${
+              selectedCards.length === 1 ? '' : 's'
+            }`"
           >
             <div
               v-for="set in $store.state.setList"
@@ -107,6 +105,22 @@ import CardInline from './CardInline'
 import Card from './Card'
 import Dropdown from './Dropdown'
 
+function debounce(func, wait, immediate) {
+  let timeout
+  return function () {
+    const context = this
+    const args = arguments
+    const later = function () {
+      timeout = null
+      if (!immediate) func.apply(context, args)
+    }
+    const callNow = immediate && !timeout
+    clearTimeout(timeout)
+    timeout = setTimeout(later, wait)
+    if (callNow) func.apply(context, args)
+  }
+}
+
 export default {
   props: {
     cards: {
@@ -129,6 +143,7 @@ export default {
       sortBy: 'newest',
       searchTerm: '',
       selectedCards: [],
+      filteredCards: [],
       forceDeselect: false,
     }
   },
@@ -138,8 +153,10 @@ export default {
     },
     allPresentSets() {
       return Object.keys(this.$store.state.setList)
-        .filter(setId => this.cards.find(card => card.set === parseInt(setId)))
-        .map(setId => ({
+        .filter((setId) =>
+          this.cards.find((card) => card.set === parseInt(setId))
+        )
+        .map((setId) => ({
           id: parseInt(setId),
           name: this.$store.state.setList[setId].name,
         }))
@@ -153,18 +170,41 @@ export default {
           : b.id - a.id
       )
     },
-    filteredCards() {
-      return this.sortedCards
-        .filter(card => this.setFilter === 'all' || this.setFilter === card.set)
+    clampedCards() {
+      return this.filteredCards.slice(0, this.shownCount)
+    },
+  },
+  watch: {
+    searchTerm() {
+      this.debouncedUpdateFilteredCards()
+    },
+  },
+  mounted() {
+    if (this.$refs.searchbar) this.$nextTick(() => this.$refs.searchbar.focus())
+    window.addEventListener('scroll', this.scroll)
+    this.updateFilteredCards()
+  },
+  beforeDestroy() {
+    window.removeEventListener('scroll', this.scroll)
+  },
+  methods: {
+    debouncedUpdateFilteredCards: debounce(function () {
+      this.updateFilteredCards()
+    }, 400),
+    updateFilteredCards() {
+      this.filteredCards = this.sortedCards
         .filter(
-          card =>
+          (card) => this.setFilter === 'all' || this.setFilter === card.set
+        )
+        .filter(
+          (card) =>
             !this.searchTerm ||
             card.front.toLowerCase().indexOf(this.searchTerm.toLowerCase()) !==
               -1 ||
             card.back.toLowerCase().indexOf(this.searchTerm.toLowerCase()) !==
               -1
         )
-        .filter(card => {
+        .filter((card) => {
           if (
             this.typeFilter === 'all' ||
             (this.typeFilter === 'new' &&
@@ -187,18 +227,7 @@ export default {
           return false
         })
     },
-    clampedCards() {
-      return this.filteredCards.slice(0, this.shownCount)
-    },
-  },
-  mounted() {
-    if (this.$refs.searchbar) this.$nextTick(() => this.$refs.searchbar.focus())
-    window.addEventListener('scroll', this.scroll)
-  },
-  beforeDestroy() {
-    window.removeEventListener('scroll', this.scroll)
-  },
-  methods: {
+
     showMore() {
       if (this.shownCount < this.cards.length) this.shownCount += 20
     },
@@ -214,14 +243,16 @@ export default {
       if (scrollPos - window.pageYOffset < 500) this.showMore()
     },
     select(cardId) {
-      const foundCard = this.cards.find(card => card.id === cardId)
+      const foundCard = this.cards.find((card) => card.id === cardId)
       if (!foundCard)
         return console.log('Unable to find card to check by the id', cardId)
       this.selectedCards.push(foundCard)
     },
     deselect(cardId) {
       const preLength = this.selectedCards.length
-      this.selectedCards = this.selectedCards.filter(card => card.id !== cardId)
+      this.selectedCards = this.selectedCards.filter(
+        (card) => card.id !== cardId
+      )
       if (this.selectedCards.length !== preLength - 1)
         console.log('Unable to find card', cardId, 'to deselect.')
     },
@@ -231,7 +262,7 @@ export default {
       this.$nextTick(() => (this.forceDeselect = true))
     },
     moveAll(toSet) {
-      this.selectedCards.forEach(card => {
+      this.selectedCards.forEach((card) => {
         this.$store.commit('moveCard', {
           id: card.id,
           from: card.set,
@@ -241,7 +272,7 @@ export default {
     },
     suspendAll() {
       const alreadySuspended = this.selectedCards[0].suspended
-      this.selectedCards.forEach(card => {
+      this.selectedCards.forEach((card) => {
         this.$store.commit('updateCard', {
           id: card.id,
           suspended: !alreadySuspended,
@@ -257,7 +288,7 @@ export default {
         )
       )
         return
-      this.selectedCards.forEach(card => {
+      this.selectedCards.forEach((card) => {
         this.$store.commit('deleteCard', card.id)
       })
       this.selectedCards = []
@@ -275,7 +306,7 @@ export default {
   position: sticky;
   padding: 10px 0 1px 0;
   top: 0;
-  z-index: 1000;
+  z-index: 9;
   background: white;
 }
 

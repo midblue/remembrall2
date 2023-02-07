@@ -140,6 +140,7 @@
         />
       -->
       <div>Click your set's name (above) to edit it.</div>
+      <button @click="markAllAsNew">Mark all cards as new</button>
       <button @click="downloadSet">Download Set</button>
       <button @click="deleteSet">Delete Set</button>
       <br /><br /><br />
@@ -276,6 +277,9 @@ export default {
           new Date().toLocaleTimeString()
       )
     },
+    markAllAsNew() {
+
+    }
   },
 }
 
