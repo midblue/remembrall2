@@ -364,7 +364,13 @@ export default () => {
     },
     actions: {
       logInAs({ commit, state }, username) {
-        console.log('log in as', username, apiUrl, `${apiUrl}/user/${username}`)
+        console.log(
+          'log in as',
+          username,
+          apiUrl,
+          `${apiUrl}/user/${username}`,
+          'x'
+        )
         this.$axios
           .get(`${apiUrl}/user/${username}`)
           .then(async (res) => {
