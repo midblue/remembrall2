@@ -837,7 +837,7 @@ const {
   getNumberDueInSet
 } = __webpack_require__(15);
 vue__WEBPACK_IMPORTED_MODULE_1___default.a.use(vuex__WEBPACK_IMPORTED_MODULE_0___default.a);
-const apiUrl = process.env === 'production' ? 'https://p.jasperstephenson.com/remembrall/api' : `/remembrall/api`;
+const apiUrl =  true ? 'https://p.jasperstephenson.com/remembrall/api' : undefined;
 function handleAxiosError(err) {
   console.log('Axios error:', err);
 }
@@ -1373,7 +1373,9 @@ async function setContext(app, context) {
       payload: context.payload,
       error: context.error,
       base: app.router.options.base,
-      env: {}
+      env: {
+        "NODE_ENV": "production"
+      }
     };
     // Only set once
 
