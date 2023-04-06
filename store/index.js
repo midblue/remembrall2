@@ -5,7 +5,10 @@ const { getNumberDueInSet } = require('~/assets/commonFunctions')
 
 Vue.use(Vuex)
 
-const apiUrl = `/remembrall/api`
+const apiUrl =
+  process.env === 'production'
+    ? 'https://p.jasperstephenson.com/remembrall/api'
+    : `/remembrall/api`
 function handleAxiosError(err) {
   console.log('Axios error:', err)
 }
