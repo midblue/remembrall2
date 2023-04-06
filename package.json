@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "nuxt",
+    "build": "nuxt build",
+    "start": "nuxt start",
     "generate": "nuxt generate",
     "golive": "npm run generate && \\cp -a ./dist/ ../personalsite2/dist/remembrall && \\cp -a ./dist/ ../personalsite2/static/remembrall && cd ../personalsite2 && git pull && git add . && git commit -m \"Updated Remembrall\" && git push && cd ../remembrall-nuxt",
     "a": "ts-node api/db/adapter.ts"
