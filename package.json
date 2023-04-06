@@ -7,7 +7,7 @@
     "build": "nuxt build",
     "start": "nuxt start",
     "generate": "nuxt generate",
-    "golive": "npm run generate && \\cp -a ./dist/ ../personalsite2/dist/remembrall && \\cp -a ./dist/ ../personalsite2/static/remembrall && cd ../personalsite2 && git pull && git add . && git commit -m \"Updated Remembrall\" && git push && cd ../remembrall-nuxt",
+    "golive": "git push && ssh root@p.jasperstephenson.com 'cd ~/remembrall2 && git pull && npm run build && source ~/.profile && pm2 restart remembrall && pm2 logs'",
     "a": "ts-node api/db/adapter.ts"
   },
   "dependencies": {
