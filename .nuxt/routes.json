@@ -3,7 +3,6 @@
     "name": "index",
     "path": "/",
     "component": "/Users/jasper/Code/remembrall-nuxt/pages/index.vue",
-    "chunkName": "pages/index",
-    "_name": "_44083746"
+    "chunkName": "pages/index"
   }
 ]
