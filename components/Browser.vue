@@ -46,6 +46,7 @@
           >
             <div
               v-for="set in $store.state.setList"
+              :key="set.id"
               class="button"
               @key="set.id"
               @click="moveAll(set.id)"
@@ -164,10 +165,10 @@ export default {
     sortedCards() {
       return this.cards.sort((a, b) =>
         this.sortBy === 'oldest'
-          ? a.id - b.id
+          ? (a.created || a.id) - (b.created || b.id)
           : this.sortBy === 'sets'
           ? b.set - a.set
-          : b.id - a.id
+          : (b.created || b.id) - (a.created || a.id)
       )
     },
     clampedCards() {
@@ -176,6 +177,12 @@ export default {
   },
   watch: {
     searchTerm() {
+      this.debouncedUpdateFilteredCards()
+    },
+    typeFilter() {
+      this.debouncedUpdateFilteredCards()
+    },
+    cards() {
       this.debouncedUpdateFilteredCards()
     },
   },

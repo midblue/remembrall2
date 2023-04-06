@@ -133,7 +133,9 @@ export default {
   },
   computed: {
     settings() {
-      return this.$store.state.setList[this.$store.state.currentSetId].settings
+      return this.$store.state.setList?.find(
+        (s) => s.id === this.$store.state.currentSetId
+      ).settings
     },
     isEditingText() {
       return this.$store.state.isEditingText

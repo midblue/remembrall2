@@ -114,7 +114,7 @@ export const autocomplete = ({
           // }
         )
           .then((result) => {
-            console.log(result.status)
+            // console.log(result.status)
             return result.text()
           })
           .then((entry) => {
@@ -126,11 +126,11 @@ export const autocomplete = ({
               if (basedOnFrontText)
                 resolve({
                   front: '',
-                  back: `Couldn't find a definition for that!`,
+                  back: '', //`Couldn't find a definition for that!`,
                 })
               resolve({
                 back: '',
-                front: `Couldn't find a definition for that!`,
+                front: '', //`Couldn't find a definition for that!`,
               })
               return
             }
@@ -142,7 +142,7 @@ export const autocomplete = ({
             const image = /<img.+? src="([^"]+dictionary-images[^"]+)"/g.exec(
               entry
             )?.[1]
-            console.log(image)
+            // console.log(image)
 
             let examples
             let example =
@@ -230,13 +230,15 @@ export const autocomplete = ({
   //   })
   // }
   else {
-    resolve({
-      front: basedOnFrontText
-        ? textToBaseOn
-        : `That language isn't supported yet!`,
-      back: !basedOnFrontText
-        ? textToBaseOn
-        : `That language isn't supported yet!`,
+    return new Promise((resolve) => {
+      resolve({
+        front: basedOnFrontText
+          ? textToBaseOn
+          : `That language isn't supported yet!`,
+        back: !basedOnFrontText
+          ? textToBaseOn
+          : `That language isn't supported yet!`,
+      })
     })
   }
 }

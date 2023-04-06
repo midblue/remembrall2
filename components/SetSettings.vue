@@ -186,11 +186,15 @@ export default {
   },
   computed: {
     currentSet() {
-      return this.$store.state.setList[this.$store.state.currentSetId]
+      return this.$store.state.setList?.find(
+        (s) => s.id === this.$store.state.currentSetId
+      )
     },
     settings() {
       return (
-        this.$store.state.setList[this.$store.state.currentSetId].settings || {}
+        this.$store.state.setList?.find(
+          (s) => s.id === this.$store.state.currentSetId
+        ).settings || {}
       )
     },
   },
@@ -277,9 +281,7 @@ export default {
           new Date().toLocaleTimeString()
       )
     },
-    markAllAsNew() {
-
-    }
+    markAllAsNew() {},
   },
 }
 

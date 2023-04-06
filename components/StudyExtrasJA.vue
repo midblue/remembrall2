@@ -41,7 +41,9 @@ export default {
   },
   computed: {
     settings() {
-      return this.$store.state.setList[this.$store.state.currentSetId].settings
+      return this.$store.state.setList?.find(
+        (s) => s.id === this.$store.state.currentSetId
+      ).settings
     },
     searchString() {
       return this.text.replace(/\n.*/g, '')
@@ -65,7 +67,7 @@ export default {
           )}${this.secondaryText.replace(/[^\u4e00-\u9faf]/g, '')}`
         )
       )
-      this.kanjiList = kanjiInText.map(character => ({
+      this.kanjiList = kanjiInText.map((character) => ({
         character: character,
         meaning: 'loading...',
       }))
@@ -115,8 +117,8 @@ export default {
             },
           }
         )
-          .then(res => res.json())
-          .then(kanjiInfo => {
+          .then((res) => res.json())
+          .then((kanjiInfo) => {
             if (kanjiInfo.error || kanjiInfo.message)
               return this.$set(this.kanjiList, index, {
                 character: character,
@@ -125,7 +127,7 @@ export default {
             this.$set(this.kanjiList, index, {
               character: kanjiInfo.kanji.character,
               meaning: kanjiInfo.kanji.meaning.english,
-              examples: kanjiInfo.examples.slice(0, 3).map(example => ({
+              examples: kanjiInfo.examples.slice(0, 3).map((example) => ({
                 japanese: example.japanese,
                 meaning: example.meaning.english,
               })),

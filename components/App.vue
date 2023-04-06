@@ -1,14 +1,13 @@
 <template>
   <section class="app" :class="{ mobile: isMobile }">
     <UserAndSetPicker />
-    <RefreshHandler />
     <div class="content">
       <transition-group appear name="list" tag="div">
         <div
           key="nosets"
           v-if="
             Object.keys($store.state.setList).length === 0 &&
-              appState !== 'user'
+            appState !== 'user'
           "
         >
           <center><h1 style="margin: 50px auto">No sets yet!</h1></center>
@@ -55,7 +54,9 @@ export default {
       return this.$store.state.currentUser
     },
     currentSet() {
-      return this.$store.state.setList[this.$store.state.currentSetId]
+      return this.$store.state.setList?.find(
+        (s) => s.id === this.$store.state.currentSetId
+      )
     },
     appState() {
       return this.$store.state.appState
@@ -171,6 +172,7 @@ button {
   margin: 0;
   border: 1px solid rgba(black, 0.1);
   background: white;
+  color: black;
   font-size: 0.85rem;
   font-weight: 400;
   padding: 10px;

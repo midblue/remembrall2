@@ -1,5 +1,5 @@
 <template>
-  <div class="refreshtakeover" :class="{ on: pauseDbSets }">
+  <div class="refreshtakeover" :class="{ on: false }">
     <span>Loading data...</span>
   </div>
 </template>
@@ -16,9 +16,6 @@ export default {
   computed: {
     currentUser() {
       return this.$store.state.currentUser
-    },
-    pauseDbSets() {
-      return this.$store.state.pauseDbSets
     },
   },
   mounted() {
@@ -39,7 +36,6 @@ export default {
     },
     refresh() {
       this.startTime = Date.now()
-      this.$store.commit('setPauseDbSets', true)
       this.$store.dispatch('logInAs', this.currentUser)
     },
   },

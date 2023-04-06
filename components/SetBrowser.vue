@@ -16,7 +16,9 @@ export default {
   },
   computed: {
     setCards() {
-      return this.$store.state.setList[this.$store.state.currentSetId].cards
+      return this.$store.state.setList?.find(
+        (s) => s.id === this.$store.state.currentSetId
+      ).cards
     },
   },
 }

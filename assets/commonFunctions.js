@@ -11,7 +11,13 @@ function findImagesForKeyword(keyword, count = 10, offset = 0) {
         .then((res) => res.text())
         .then((html) => {
           let urls = []
-          const regex = /photo-list-photo-view[^>]*url\((.*)\)/g
+          html = html
+            .slice(
+              html.indexOf('search-photos-results'),
+              html.indexOf('sidebar-column')
+            )
+            .replace(/\n/g, '')
+          const regex = /photo-list-photo-container.*?src="([^"]*)"/g
           let found = regex.exec(html)
           while (found) {
             urls.push(`https:${found[1]}`)
@@ -69,6 +75,7 @@ exports.getKeyWord = getKeyWord
 let currOffset = 1
 exports.getRandomImage = function (text) {
   const keyword = getKeyWord(text, true)
+  console.log(`Searching image for ${keyword}...`)
   currOffset = (currOffset % 99) + 1
   return new Promise((resolve) => {
     findImagesForKeyword(keyword, 1, currOffset).then((images) => {
@@ -82,7 +89,7 @@ exports.getNumberDueInSet = function (set) {
   const now = Date.now()
   const maxNew = set.settings ? set.settings.maxNewPerDay : 999999
   const newToday = set.newToday
-  if (!set.cards) return 0
+  if (!set.cards?.length) return 0
 
   const dueInDeck = Math.min(
     set.cards.reduce(

@@ -72,12 +72,11 @@ export default {
   },
   computed: {
     displayMarkdown() {
-      let markdown = (this.displayText.length > 0
-        ? this.displayText
-        : this.text
+      let markdown = (
+        this.displayText.length > 0 ? this.displayText : this.text
       )
         .split('\n')
-        .map(string => {
+        .map((string) => {
           const output = markdownit.render(string)
           return output || '<br />'
         })
@@ -261,7 +260,7 @@ function getSelectedText(el) {
     } else return null
   }
 
-  const getTextLength = function(parent, node, offset) {
+  const getTextLength = function (parent, node, offset) {
     let textLength = 0
     // console.log('1', node, node.nodeName)
     if (node.nodeName === '#text') textLength += offset
@@ -273,7 +272,7 @@ function getSelectedText(el) {
     return textLength
   }
 
-  const getNodeTextLength = function(node) {
+  const getNodeTextLength = function (node) {
     let textLength = 0
     // console.log('2', node, node.nodeName)
     if (node.nodeName === 'BR') textLength = 1
@@ -284,7 +283,7 @@ function getSelectedText(el) {
     return textLength
   }
 
-  const getNodeOffset = function(node) {
+  const getNodeOffset = function (node) {
     return node == null ? -1 : 1 + getNodeOffset(node.previousSibling)
   }
 

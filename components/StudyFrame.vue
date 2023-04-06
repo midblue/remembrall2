@@ -171,15 +171,20 @@ export default {
     },
     settings() {
       return (
-        this.$store.state.setList[this.$store.state.currentSetId].settings || {}
+        this.$store.state.setList?.find(
+          (s) => s.id === this.$store.state.currentSetId
+        ).settings || {}
       )
     },
     newToday() {
-      return this.$store.state.setList[this.$store.state.currentSetId].newToday
+      return this.$store.state.setList?.find(
+        (s) => s.id === this.$store.state.currentSetId
+      ).newToday
     },
     reviewsToday() {
-      return this.$store.state.setList[this.$store.state.currentSetId]
-        .reviewsToday
+      return this.$store.state.setList?.find(
+        (s) => s.id === this.$store.state.currentSetId
+      ).reviewsToday
     },
     doneForDay() {
       return this.doneReviewing && this.doneWithNewCards

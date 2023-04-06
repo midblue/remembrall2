@@ -51,7 +51,9 @@ export default {
   },
   computed: {
     currentSet() {
-      return this.$store.state.setList[this.$store.state.currentSetId]
+      return this.$store.state.setList?.find(
+        (s) => s.id === this.$store.state.currentSetId
+      )
     },
     totalReviews() {
       return this.oks + this.agains

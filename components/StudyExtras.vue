@@ -50,7 +50,9 @@ export default {
   },
   computed: {
     settings() {
-      return this.$store.state.setList[this.$store.state.currentSetId].settings
+      return this.$store.state.setList?.find(
+        (s) => s.id === this.$store.state.currentSetId
+      ).settings
     },
     searchString() {
       return this.text.replace(/\n.*/g, '')

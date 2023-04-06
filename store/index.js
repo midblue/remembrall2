@@ -1,20 +1,23 @@
 import Vuex from 'vuex'
 import Vue from 'vue'
 const storage = require('~/assets/storage')
-const dbManager = require('~/assets/dbManager')
 const { getNumberDueInSet } = require('~/assets/commonFunctions')
 
 Vue.use(Vuex)
+
+const apiUrl = `/remembrall/api`
+function handleAxiosError(err) {
+  console.log('Axios error:', err)
+}
 
 export default () => {
   return new Vuex.Store({
     state: {
       currentUser: null,
-      setList: {},
+      setList: [],
       currentSetId: null,
       appState: 'study',
       isMobile: false,
-      pauseDbSets: false,
       isEditingText: false,
     },
     mutations: {
@@ -24,21 +27,11 @@ export default () => {
         storage.set('currentUser', newUsername)
       },
       setSetList(state, newSetList) {
-        // for (let set in newSetList) { // clear out unnecessary props
-        //   newSetList[set].cards = newSetList[set].cards.map(card => ({
-        //     id: card.id,
-        //     front: card.front,
-        //     back: card.back,
-        //     totalReviews: card.totalReviews,
-        //     timeMod: card.timeMod,
-        //     ok: card.ok,
-        //     again: card.again,
-        //     nextReview: new Date(card.nextReview).getTime(),
-        //   }))
-        // }
         state.setList = newSetList
       },
       setCurrentSetId(state, newSetId) {
+        if (!state.setList.find((s) => s.id === newSetId))
+          newSetId = state.setList[0]?.id
         state.currentSetId = newSetId
         if (state.appState === 'user') state.appState = 'study'
         storage.set('currentSetId', newSetId)
@@ -53,9 +46,6 @@ export default () => {
       setAppWidth(state, newWidth) {
         state.isMobile = parseInt(newWidth) <= 768
       },
-      setPauseDbSets(state, shouldPause) {
-        state.pauseDbSets = shouldPause
-      },
       setIsEditingText(state, isEditing) {
         state.isEditingText = isEditing
       },
@@ -67,49 +57,64 @@ export default () => {
 
       // sets
       updateSetName(state, newName) {
-        Vue.set(state.setList[state.currentSetId], 'name', newName)
+        Vue.set(
+          state.setList.find((s) => s.id === state.currentSetId),
+          'name',
+          newName
+        )
         // update set last updated
-        Vue.set(state.setList[state.currentSetId], 'lastUpdated', Date.now())
-        if (!state.pauseDbSets)
-          dbManager.updateSet(
-            state.currentUser,
-            {
-              id: state.currentSetId,
-              name: state.setList[state.currentSetId].name,
-              lastUpdated: state.setList[state.currentSetId].lastUpdated,
-            },
-            `updating set name`
-          )
+        Vue.set(
+          state.setList.find((s) => s.id === state.currentSetId),
+          'lastUpdated',
+          Date.now()
+        )
+
+        this.$axios
+          .post(`${apiUrl}/set/update/${state.currentUser}`, {
+            id: state.currentSetId,
+            name: state.setList.find((s) => s.id === state.currentSetId).name,
+            lastUpdated: state.setList.find((s) => s.id === state.currentSetId)
+              .lastUpdated,
+          })
+          .catch(handleAxiosError)
       },
       updateSetSettings(state, newSettings) {
         for (const param in newSettings) {
-          if (!state.setList[state.currentSetId].settings)
-            state.setList[state.currentSetId].settings = {}
+          if (!state.setList.find((s) => s.id === state.currentSetId).settings)
+            state.setList.find((s) => s.id === state.currentSetId).settings = {}
           Vue.set(
-            state.setList[state.currentSetId].settings,
+            state.setList.find((s) => s.id === state.currentSetId).settings,
             param,
             newSettings[param]
           )
         }
         // update set last updated
-        Vue.set(state.setList[state.currentSetId], 'lastUpdated', Date.now())
-        if (!state.pauseDbSets)
-          dbManager.updateSet(
-            state.currentUser,
-            {
-              id: state.currentSetId,
-              settings: state.setList[state.currentSetId].settings,
-              lastUpdated: state.setList[state.currentSetId].lastUpdated,
-            },
-            `updating set settings`
-          )
+        Vue.set(
+          state.setList.find((s) => s.id === state.currentSetId),
+          'lastUpdated',
+          Date.now()
+        )
+
+        this.$axios
+          .post(`${apiUrl}/set/update/${state.currentUser}`, {
+            id: state.currentSetId,
+            settings: state.setList.find((s) => s.id === state.currentSetId)
+              .settings,
+            lastUpdated: state.setList.find((s) => s.id === state.currentSetId)
+              .lastUpdated,
+          })
+          .catch(handleAxiosError)
       },
       addSet(state) {
         const newSet = blankSet()
-        state.setList[newSet.id] = newSet
+        state.setList.push(newSet)
         state.currentSetId = newSet.id
         storage.set('currentSetId', newSet.id)
-        if (!state.pauseDbSets) dbManager.setSet(state.currentUser, newSet)
+        state.appState = 'addCard'
+
+        this.$axios
+          .post(`${apiUrl}/set/set/${state.currentUser}`, newSet)
+          .catch(handleAxiosError)
       },
       uploadSet(state, uploadedSet) {
         const newSet = blankSet()
@@ -118,52 +123,65 @@ export default () => {
         state.setList[newSet.id] = newSet
         state.currentSetId = newSet.id
         storage.set('currentSetId', newSet.id)
-        if (!state.pauseDbSets) dbManager.setSet(state.currentUser, newSet)
+
+        this.$axios
+          .post(`${apiUrl}/set/set/${state.currentUser}`, newSet)
+          .catch(handleAxiosError)
       },
       deleteSet(state, setId) {
-        Vue.delete(state.setList, setId)
-        state.currentSetId = Object.keys(state.setList)[0]
-        if (!state.pauseDbSets) dbManager.deleteSet(state.currentUser, setId)
+        console.log('deleting set', setId)
+        const newSetList = state.setList.filter((s) => s.id !== setId)
+        state.setList = newSetList
+        state.currentSetId = state.setList[0]?.id
+
+        this.$axios
+          .get(`${apiUrl}/set/delete/${state.currentUser}/${setId}`)
+          .catch(handleAxiosError)
       },
 
       // set-level daily review numbers
-      resetSetDay(state, setId) {
-        Vue.set(state.setList[setId], 'newToday', 0)
-        Vue.set(state.setList[setId], 'reviewsToday', 0)
-        Vue.set(state.setList[setId], 'lastUpdated', Date.now())
-        if (!state.pauseDbSets)
-          dbManager.updateSet(
-            state.currentUser,
-            {
-              id: setId,
-              newToday: 0,
-              reviewsToday: 0,
-              lastUpdated: state.setList[setId].lastUpdated,
-            },
-            `resetting set day`
-          )
+      resetSetDay(state, setIndex) {
+        if (!state.setList[setIndex]) return
+        Vue.set(state.setList[setIndex], 'newToday', 0)
+        Vue.set(state.setList[setIndex], 'reviewsToday', 0)
+        Vue.set(state.setList[setIndex], 'lastUpdated', Date.now())
+
+        this.$axios
+          .post(`${apiUrl}/set/update/${state.currentUser}`, {
+            id: state.setList[setIndex].id,
+            newToday: 0,
+            reviewsToday: 0,
+            lastUpdated: state.setList[setIndex].lastUpdated,
+          })
+          .catch(handleAxiosError)
       },
 
       // cards
       addCard(state, card) {
-        const newCards = state.setList[state.currentSetId].cards || []
+        const newCards =
+          state.setList.find((s) => s.id === state.currentSetId).cards || []
         newCards.push({
           ...card,
           id: Date.now(),
         })
-        Vue.set(state.setList[state.currentSetId], 'cards', newCards)
+        Vue.set(
+          state.setList.find((s) => s.id === state.currentSetId),
+          'cards',
+          newCards
+        )
         // update set last updated
-        Vue.set(state.setList[state.currentSetId], 'lastUpdated', Date.now())
-        if (!state.pauseDbSets)
-          dbManager.updateSet(
-            state.currentUser,
-            {
-              id: state.currentSetId,
-              cards: newCards,
-              lastUpdated: state.setList[state.currentSetId].lastUpdated,
-            },
-            `adding card`
+        Vue.set(
+          state.setList.find((s) => s.id === state.currentSetId),
+          'lastUpdated',
+          Date.now()
+        )
+
+        this.$axios
+          .post(
+            `${apiUrl}/card/update/${state.currentUser}/${state.currentSetId}`,
+            card
           )
+          .catch(handleAxiosError)
       },
       updateCard(state, card) {
         let setWithCard
@@ -174,7 +192,7 @@ export default () => {
               (currentSetCard) => currentSetCard.id === card.id
             )
           ) {
-            setWithCard = parseInt(set)
+            setWithCard = set
             break
           }
         if (!setWithCard)
@@ -192,25 +210,23 @@ export default () => {
         // update set last updated
         Vue.set(state.setList[setWithCard], 'lastUpdated', Date.now())
         // update db
-        if (!state.pauseDbSets)
-          dbManager.updateSet(
-            state.currentUser,
-            {
-              id: setWithCard,
-              cards: state.setList[setWithCard].cards,
-              lastUpdated: state.setList[setWithCard].lastUpdated,
-            },
-            `updating card`
+
+        this.$axios
+          .post(
+            `${apiUrl}/card/update/${state.currentUser}/${state.setList[setWithCard].id}`,
+            card
           )
+          .catch(handleAxiosError)
       },
       studyCard(state, card) {
-        const foundCardIndex = state.setList[
-          state.currentSetId
-        ].cards.findIndex((c) => c.id === card.id)
+        const foundCardIndex = state.setList
+          .find((s) => s.id === state.currentSetId)
+          .cards.findIndex((c) => c.id === card.id)
         // update card data
         if (foundCardIndex !== undefined) {
-          const existingCard =
-            state.setList[state.currentSetId].cards[foundCardIndex]
+          const existingCard = state.setList.find(
+            (s) => s.id === state.currentSetId
+          ).cards[foundCardIndex]
           for (const param in card) {
             Vue.set(existingCard, param, card[param])
           }
@@ -220,196 +236,159 @@ export default () => {
         }
         // update newToday, reviewsToday
         if (
-          new Date(state.setList[state.currentSetId].lastUpdated).getDate() !==
-          new Date().getDate()
+          new Date(
+            state.setList.find((s) => s.id === state.currentSetId).lastUpdated
+          ).getDate() !== new Date().getDate()
         ) {
           // new day
-          Vue.set(state.setList[state.currentSetId], 'newToday', 0)
-          Vue.set(state.setList[state.currentSetId], 'reviewsToday', 0)
+          Vue.set(
+            state.setList.find((s) => s.id === state.currentSetId),
+            'newToday',
+            0
+          )
+          Vue.set(
+            state.setList.find((s) => s.id === state.currentSetId),
+            'reviewsToday',
+            0
+          )
         }
         if (card.totalReviews <= 1)
           Vue.set(
-            state.setList[state.currentSetId],
+            state.setList.find((s) => s.id === state.currentSetId),
             'newToday',
-            state.setList[state.currentSetId].newToday
-              ? state.setList[state.currentSetId].newToday + 1
+            state.setList.find((s) => s.id === state.currentSetId).newToday
+              ? state.setList.find((s) => s.id === state.currentSetId)
+                  .newToday + 1
               : 1
           )
         else
           Vue.set(
-            state.setList[state.currentSetId],
+            state.setList.find((s) => s.id === state.currentSetId),
             'reviewsToday',
-            state.setList[state.currentSetId].reviewsToday
-              ? state.setList[state.currentSetId].reviewsToday + 1
+            state.setList.find((s) => s.id === state.currentSetId).reviewsToday
+              ? state.setList.find((s) => s.id === state.currentSetId)
+                  .reviewsToday + 1
               : 1
           )
         // update set last updated
-        Vue.set(state.setList[state.currentSetId], 'lastUpdated', Date.now())
+        Vue.set(
+          state.setList.find((s) => s.id === state.currentSetId),
+          'lastUpdated',
+          Date.now()
+        )
         // update Db
-        if (!state.pauseDbSets)
-          dbManager.updateSet(
-            state.currentUser,
-            {
-              id: state.currentSetId,
-              lastUpdated: state.setList[state.currentSetId].lastUpdated,
-              newToday: state.setList[state.currentSetId].newToday,
-              reviewsToday: state.setList[state.currentSetId].reviewsToday,
-              cards: state.setList[state.currentSetId].cards,
-            },
-            `studying card`
+
+        this.$axios
+          .post(
+            `${apiUrl}/card/update/${state.currentUser}/${state.currentSetId}`,
+            card
           )
+          .catch(handleAxiosError)
+        // update set data
+        this.$axios
+          .post(`${apiUrl}/set/update/${state.currentUser}`, {
+            id: state.currentSetId,
+            newToday: state.setList.find((s) => s.id === state.currentSetId)
+              .newToday,
+            reviewsToday: state.setList.find((s) => s.id === state.currentSetId)
+              .reviewsToday,
+          })
+          .catch(handleAxiosError)
       },
       deleteCard(state, id) {
         let setWithCard
-        for (const set in state.setList)
+        for (const setIndex in state.setList) // index
           if (
-            state.setList[set].cards &&
-            state.setList[set].cards.find((card) => card.id === id)
+            state.setList[setIndex].cards &&
+            state.setList[setIndex].cards.find((card) => card.id === id)
           ) {
-            setWithCard = state.setList[set]
+            setWithCard = state.setList[setIndex]
             break
           }
         if (!setWithCard)
           return console.log('No card found by the id', id, 'in any deck.')
-        const newCards = setWithCard.cards.filter((card) => card.id !== id)
+        const newCards = setWithCard.cards.filter(
+          (card) => `${card.id}` !== `${id}`
+        )
         Vue.set(setWithCard, 'cards', newCards)
         // update set last updated
         Vue.set(setWithCard, 'lastUpdated', Date.now())
+
         // update db
-        if (!state.pauseDbSets)
-          dbManager.updateSet(state.currentUser, {
-            id: setWithCard.id,
-            cards: setWithCard.cards,
-            lastUpdated: setWithCard.lastUpdated,
-          })
+        this.$axios
+          .get(
+            `${apiUrl}/card/delete/${state.currentUser}/${setWithCard.id}/${id}`
+          )
+          .catch(handleAxiosError)
       },
       moveCard(state, { id, from, to }) {
         if (from == to) return console.log('Same set!')
-        const cardToMove = state.setList[from].cards.find(
-          (card) => card.id === id
-        )
+        const fromSet = state.setList.find((set) => set.id === from)
+        if (!fromSet) return console.log('No set found (from) by the id', from)
+        const toSet = state.setList.find((set) => set.id === to)
+        if (!toSet) return console.log('No set found (to) by the id', to)
+        const cardToMove = fromSet.cards.find((card) => card.id === id)
         if (!cardToMove) return
         // update set property
         cardToMove.set = to
         // add to destination deck
-        const newDestCards = state.setList[to].cards
+        const newDestCards = toSet.cards
         newDestCards.push(cardToMove)
-        Vue.set(state.setList[to], 'cards', newDestCards)
+        Vue.set(toSet, 'cards', newDestCards)
         // update set last updated
-        Vue.set(state.setList[to], 'lastUpdated', Date.now())
-        if (!state.pauseDbSets)
-          dbManager.updateSet(
-            state.currentUser,
-            {
-              id: to,
-              cards: state.setList[to].cards,
-              lastUpdated: state.setList[to].lastUpdated,
-            },
-            `moving card to new set`
-          )
+        Vue.set(toSet, 'lastUpdated', Date.now())
+
+        this.$axios
+          .post(`${apiUrl}/set/update/${state.currentUser}`, {
+            id: toSet.id,
+            cards: toSet.cards,
+            lastUpdated: toSet.lastUpdated,
+          })
+          .catch(handleAxiosError)
         // delete from source deck
-        const newSourceCards = state.setList[from].cards.filter(
-          (card) => card.id !== id
-        )
-        Vue.set(state.setList[from], 'cards', newSourceCards)
+        const newSourceCards = fromSet.cards.filter((card) => card.id !== id)
+        Vue.set(fromSet, 'cards', newSourceCards)
         // update set last updated
-        Vue.set(state.setList[from], 'lastUpdated', Date.now())
+        Vue.set(fromSet, 'lastUpdated', Date.now())
         // update db
-        if (!state.pauseDbSets)
-          dbManager.updateSet(
-            state.currentUser,
-            {
-              id: state.setList[from].id,
-              cards: state.setList[from].cards,
-              lastUpdated: state.setList[from].lastUpdated,
-            },
-            `deleting moved card from old set`
+
+        this.$axios
+          .get(
+            `${apiUrl}/card/move/${state.currentUser}/${fromSet.id}/${toSet.id}/${id}`
           )
+          .catch(handleAxiosError)
       },
     },
     actions: {
       logInAs({ commit, state }, username) {
-        dbManager.getAllSets(username).then((res) => {
-          const { docs, empty } = res
-
-          // falsely empty state (disconnect)
-          if (empty && username === state.currentUser) {
-            console.log('dc')
-            return commit('setPauseDbSets', false)
-          }
-
-          // get all sets from response
-          const setsFromDb = {}
-          docs.forEach((doc) => {
-            const set = doc.data()
-            // if (!set.lastUpdated) return
-            setsFromDb[set.id] = set
-          })
-
-          // just until everyone has this updated, give each card a set prop
-          for (const set in setsFromDb) {
-            if (!setsFromDb[set].cards) continue
-            setsFromDb[set].cards = setsFromDb[set].cards.map((card) => ({
-              ...card,
-              set: parseInt(set),
-            }))
-          }
-
-          // first ever load
-          if (!state.currentUser && empty) {
-            console.log('first')
-            // alert('new user')
-            dbManager.newUser(username)
-            // if (Object.keys(setsFromDb).length === 0) {
-            //   setsFromDb = newSetObject()
-            //   dbManager.setSet(username, setsFromDb[Object.keys(setsFromDb)[0]])
-            // }
-          }
-
-          // refresh
-          if (!empty && username === state.currentUser) {
-            for (const id in setsFromDb) {
-              if (!state.setList[id]) {
-                console.log(
-                  'Deck ' +
-                    id +
-                    ' has been created elsewhere, and will now be loaded.'
-                )
-              }
-              // if something in these sets has been updated elsewhere
-              else if (
-                setsFromDb[id].lastUpdated < state.setList[id].lastUpdated
-              ) {
-                // const ignoreDatabaseCopy = confirm(
-                //   `OLD VERSION OF SET ${setsFromDb[id].name} IN DATABASE. Skip update from database? (Dumped database copy to localStorage)`
-                // )
-                storage.set(`${id}`, setsFromDb[id].cards)
-                console.log(
-                  `old version of set ${setsFromDb[id].name} in database. skipping update from database.`,
-                  setsFromDb[id].lastUpdated,
-                  state.setList[id].lastUpdated,
-                  setsFromDb[id],
-                  state.setList[id]
-                )
-                setsFromDb[id] = state.setList[id]
-                // if (ignoreDatabaseCopy) {
-                //   console.log('overwriting')
-                // }
-              }
+        this.$axios
+          .get(`${apiUrl}/user/${username}`)
+          .then(async (res) => {
+            if (!res.data) {
+              // new user
+              res = await this.$axios.get(`${apiUrl}/user/create/${username}`)
             }
-          }
+            const user = res.data
 
-          // finish up
-          commit('setUsername', username)
-          commit('setSetList', setsFromDb)
-          commit(
-            'setCurrentSetId',
-            setsFromDb[storage.get('currentSetId')]
-              ? storage.get('currentSetId')
-              : Object.keys(setsFromDb)[0]
-          )
-          commit('setPauseDbSets', false)
-        })
+            // falsely empty state (disconnect)
+            if (!user && username === state.currentUser) {
+              console.log('dc')
+            }
+
+            // get all sets from response
+            const setsFromDb = user.sets || []
+
+            // finish up
+            commit('setUsername', username)
+            commit('setSetList', setsFromDb)
+            commit(
+              'setCurrentSetId',
+              setsFromDb.find((s) => s.id === storage.get('currentSetId'))
+                ? storage.get('currentSetId')
+                : Object.keys(setsFromDb)[0]
+            )
+          })
+          .catch(handleAxiosError)
       },
       goToNextSet({ commit, state }, thatHasDueCards = false) {
         let allIds = Object.keys(state.setList)
@@ -477,5 +456,5 @@ function blankSet() {
 //     nextReview: card.nextReview,
 //   }))
 // }
-// const sanitizedCards = sanitizeCards(state.setList[state.currentSetId].cards)
-// Vue.set(state.setList[state.currentSetId], 'cards', sanitizedCards)
+// const sanitizedCards = sanitizeCards(state.setList.find(s => s.id === state.currentSetId).cards)
+// Vue.set(state.setList.find(s => s.id === state.currentSetId), 'cards', sanitizedCards)

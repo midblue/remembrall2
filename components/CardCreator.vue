@@ -102,11 +102,14 @@ export default {
   },
   computed: {
     languageTools() {
-      return this.$store.state.setList[this.$store.state.currentSetId].settings
-        .languageTools
+      return this.$store.state.setList?.find(
+        (s) => s.id === this.$store.state.currentSetId
+      ).settings.languageTools
     },
     cards() {
-      return this.$store.state.setList[this.$store.state.currentSetId].cards
+      return this.$store.state.setList?.find(
+        (s) => s.id === this.$store.state.currentSetId
+      ).cards
     },
   },
   watch: {
@@ -208,6 +211,7 @@ export default {
     autoSetImage() {
       getRandomImage(this.front || this.back).then((image) => {
         if (image) this.imageURL = image
+        else this.floatText = 'No image found.'
       })
     },
     autoComplete() {
@@ -228,7 +232,7 @@ export default {
         textToBaseOn,
         language: this.languageTools,
       }).then((newValues) => {
-        console.log(newValues)
+        // console.log(newValues)
         this.front = newValues.front || this.front
         this.back = newValues.back || this.back
         this.imageURL = newValues.image || this.imageURL || ''

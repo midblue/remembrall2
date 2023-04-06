@@ -38,9 +38,7 @@
           v-for="set in setList"
           :key="set.id"
           :class="{
-            active:
-              parseInt(currentSetId) === parseInt(set.id) &&
-              appState !== 'user',
+            active: currentSetId === set.id && appState !== 'user',
             // duecards: dueReviews[set.id] > 0,
           }"
           @click="switchSet(set.id)"
@@ -48,10 +46,10 @@
           {{ set.name }}
           <span
             v-if="
-              !isMobile &&
-              dueReviews[set.id] > 0 &&
-              (parseInt(currentSetId) !== parseInt(set.id) ||
-                appState === 'user')
+              (!isMobile &&
+                dueReviews[set.id] > 0 &&
+                currentSetId !== set.id) ||
+              appState === 'user'
             "
             class="sub"
           >
@@ -149,8 +147,12 @@ export default {
       return this.$store.state.currentSetId
     },
     currentCards() {
-      return this.$store.state.setList[this.$store.state.currentSetId]
-        ? this.$store.state.setList[this.$store.state.currentSetId].cards
+      return this.$store.state.setList?.find(
+        (s) => s.id === this.$store.state.currentSetId
+      )
+        ? this.$store.state.setList?.find(
+            (s) => s.id === this.$store.state.currentSetId
+          ).cards
         : []
     },
     isMobile() {
@@ -221,18 +223,26 @@ export default {
     },
     updateDueReviews() {
       this.dueReviews = {}
-      for (const setId in this.setList) {
+      for (const setIndex in this.setList) {
+        if (!this.setList?.[setIndex]) continue
         if (
-          new Date(this.setList[setId].lastUpdated).getDate() !==
+          new Date(this.setList[setIndex].lastUpdated).getDate() !==
           new Date().getDate()
         ) {
-          this.$store.commit('resetSetDay', setId)
+          this.$store.commit('resetSetDay', setIndex)
         }
-        this.dueReviews[setId] = getNumberDueInSet(this.setList[setId])
+        this.dueReviews[this.setList[setIndex].id] = getNumberDueInSet(
+          this.setList[setIndex]
+        )
       }
     },
     checkClickToClose(e) {
-      if (!(e.composedPath ? e.composedPath() : e.path).includes(this.$refs.mainButton)) this.setPickerOpen = false
+      if (
+        !(e.composedPath ? e.composedPath() : e.path).includes(
+          this.$refs.mainButton
+        )
+      )
+        this.setPickerOpen = false
     },
     uploaded(e) {
       const file = e.target.files[0]

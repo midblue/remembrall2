@@ -17,7 +17,9 @@ export default {
   },
   computed: {
     settings() {
-      return this.$store.state.setList[this.$store.state.currentSetId].settings
+      return this.$store.state.setList?.find(
+        (s) => s.id === this.$store.state.currentSetId
+      ).settings
     },
   },
   watch: {
@@ -62,7 +64,7 @@ export default {
         this.speaker.voice =
           possibleVoices[Math.floor(Math.random() * possibleVoices.length)]
       }
-      console.log(this.speaker.voice.name)
+      // console.log(this.speaker.voice.name)
     },
     speakWord() {
       this.spawnSpeaker()

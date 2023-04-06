@@ -49,7 +49,7 @@
         </div>
 
         <div
-          v-if="allSets.length > 1"
+          v-if="$store.state.setList.length > 1"
           ref="movetobutton"
           class="button movetobutton"
           @mouseover="!isMobile ? (moveToSetOpen = true) : false"
@@ -64,8 +64,10 @@
             :class="{ mobile: isMobile }"
           >
             <div
-              v-for="set in allSets"
-              v-if="set.id != realSetId"
+              v-for="set of $store.state.setList.filter(
+                (s) => `${s.id}` !== `${realSetId}`
+              )"
+              :key="set.id"
               class="button"
               @key="set.id"
               @click="moveToSet(set.id)"
@@ -119,15 +121,9 @@ export default {
       return this.$store.state.isMobile
     },
     settings() {
-      return this.$store.state.setList[this.$store.state.currentSetId].settings
-    },
-    allSets() {
-      const allSetsObject = this.$store.state.setList
-      const allSetsArray = []
-      for (const setId in allSetsObject) {
-        allSetsArray.push({ id: setId, name: allSetsObject[setId].name })
-      }
-      return allSetsArray
+      return this.$store.state.setList?.find(
+        (s) => s.id === this.$store.state.currentSetId
+      ).settings
     },
   },
   watch: {
