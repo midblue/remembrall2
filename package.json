@@ -7,7 +7,7 @@
     "build": "nuxt build",
     "start": "NODE_ENV=production && nuxt start",
     "generate": "nuxt generate",
-    "golive": "nuxt build && git add ./.nuxt && git add dist && git commit -m \"build\" && git push; ssh root@p.jasperstephenson.com 'source ~/.profile && cd ~/remembrall2 && git pull && /root/.nvm/versions/node/v16.17.1/bin/pm2 restart remembrall && /root/.nvm/versions/node/v16.17.1/bin/pm2 logs'",
+    "golive": "nuxt build && git add ./.nuxt; git add ./dist; git commit -m \"build\" && git push; ssh root@p.jasperstephenson.com 'source ~/.profile && cd ~/remembrall2 && git pull && /root/.nvm/versions/node/v16.17.1/bin/pm2 restart remembrall && /root/.nvm/versions/node/v16.17.1/bin/pm2 logs'",
     "a": "ts-node api/db/adapter.ts"
   },
   "dependencies": {
@@ -23,7 +23,6 @@
     "@nuxt/typescript-build": "^2.1.0",
     "@nuxtjs/eslint-config-typescript": "^6.0.1",
     "@nuxtjs/eslint-module": "^3.0.2",
-    "@vue/runtime-dom": "^3.2.47",
     "eslint": "^7.29.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-nuxt": "^2.0.0",

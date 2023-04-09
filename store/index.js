@@ -6,7 +6,7 @@ const { getNumberDueInSet } = require('~/assets/commonFunctions')
 Vue.use(Vuex)
 
 const apiUrl =
-  process.env === 'production'
+  process.env.NODE_ENV === 'production'
     ? 'https://p.jasperstephenson.com/remembrall/api'
     : `/remembrall/api`
 function handleAxiosError(err) {
@@ -401,7 +401,7 @@ export default () => {
           .catch(handleAxiosError)
       },
       goToNextSet({ commit, state }, thatHasDueCards = false) {
-        let allIds = Object.keys(state.setList)
+        let allIds = state.setList.map((s) => s.id)
         if (thatHasDueCards)
           allIds = allIds.filter(
             (id) => getNumberDueInSet(state.setList[id]) > 0
@@ -412,7 +412,7 @@ export default () => {
         commit('setCurrentSetId', nextSetId)
       },
       goToPreviousSet({ commit, state }, thatHasDueCards = false) {
-        let allIds = Object.keys(state.setList)
+        let allIds = state.setList.map((s) => s.id)
         if (thatHasDueCards)
           allIds = allIds.filter(
             (id) => getNumberDueInSet(state.setList[id]) > 0
