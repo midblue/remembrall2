@@ -1085,7 +1085,7 @@ function handleAxiosError(err) {
         commit,
         state
       }, thatHasDueCards = false) {
-        let allIds = Object.keys(state.setList);
+        let allIds = state.setList.map(s => s.id);
         if (thatHasDueCards) allIds = allIds.filter(id => getNumberDueInSet(state.setList[id]) > 0);
         if (allIds.length === 0) return;
         const nextSetId = allIds[(allIds.indexOf(state.currentSetId) + 1) % allIds.length];
@@ -1095,7 +1095,7 @@ function handleAxiosError(err) {
         commit,
         state
       }, thatHasDueCards = false) {
-        let allIds = Object.keys(state.setList);
+        let allIds = state.setList.map(s => s.id);
         if (thatHasDueCards) allIds = allIds.filter(id => getNumberDueInSet(state.setList[id]) > 0);
         if (allIds.length === 0) return;
         const previousSetId = allIds[(allIds.indexOf(state.currentSetId) - 1 + allIds.length) % allIds.length];

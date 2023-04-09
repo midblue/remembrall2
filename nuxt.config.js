@@ -3,6 +3,10 @@ export default {
     base: '/remembrall/',
   },
 
+  env: {
+    NODE_ENV: process.env.NODE_ENV,
+  },
+
   server: {
     port: 3001,
   },

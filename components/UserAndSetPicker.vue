@@ -68,20 +68,20 @@
           ← Back to Studying
         </button>
         <button
-          v-else-if="!setList[currentSetId]"
+          v-else-if="!setList.find((s) => s.id === currentSetId)"
           @click="$store.commit('addSet')"
         >
           + Add Set
         </button>
         <button
           v-else
-          :key="setList[currentSetId].id"
+          :key="currentSetId"
           class="mainbutton"
           :class="{ open: setPickerOpen }"
           style="position: relative"
           @click="setPickerOpen = !setPickerOpen"
         >
-          {{ setList[currentSetId].name }} ▾
+          {{ setList.find((s) => s.id === currentSetId).name }} ▾
           <div v-if="setPickerOpen" class="secondarypanel">
             <button
               v-for="set in setListWithoutCurrentSet"
@@ -139,9 +139,7 @@ export default {
       return this.$store.state.setList || []
     },
     setListWithoutCurrentSet() {
-      return Object.values(this.setList).filter(
-        (s) => s.id !== this.currentSetId
-      )
+      return this.setList.filter((s) => s.id !== this.currentSetId)
     },
     currentSetId() {
       return this.$store.state.currentSetId
