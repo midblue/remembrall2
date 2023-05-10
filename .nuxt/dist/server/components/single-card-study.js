@@ -227,7 +227,7 @@ var component = Object(componentNormalizer["a" /* default */])(
 // ESM COMPAT FLAG
 __webpack_require__.r(__webpack_exports__);
 
-// CONCATENATED MODULE: ./node_modules/babel-loader/lib??ref--2-0!./node_modules/vue-loader/lib/loaders/templateLoader.js??ref--6!./node_modules/@nuxt/components/dist/loader.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./components/AutoSpeaker.vue?vue&type=template&id=07e14b61&
+// CONCATENATED MODULE: ./node_modules/babel-loader/lib??ref--2-0!./node_modules/vue-loader/lib/loaders/templateLoader.js??ref--6!./node_modules/@nuxt/components/dist/loader.js??ref--0-0!./node_modules/vue-loader/lib??vue-loader-options!./components/AutoSpeaker.vue?vue&type=template&id=01e7e9b1&
 var render = function render() {
   var _vm = this,
     _c = _vm._self._c;
@@ -235,7 +235,7 @@ var render = function render() {
 };
 var staticRenderFns = [];
 
-// CONCATENATED MODULE: ./components/AutoSpeaker.vue?vue&type=template&id=07e14b61&
+// CONCATENATED MODULE: ./components/AutoSpeaker.vue?vue&type=template&id=01e7e9b1&
 
 // EXTERNAL MODULE: ./assets/commonFunctions.js
 var commonFunctions = __webpack_require__(15);
@@ -280,7 +280,7 @@ var commonFunctions = __webpack_require__(15);
       const possibleVoices = window.speechSynthesis.getVoices().filter(v => v.lang.split('-')[0].toLowerCase() === this.language);
       const preferredSpeakers = {
         es: ['Google ', 'Paulina', 'Mónica'],
-        en: ['Google ', 'Samantha'],
+        en: ['Google ', 'Samantha', 'Karen', 'Daniel'],
         any: ['Google ']
       };
       const possibleSpeakerNames = [...(preferredSpeakers[this.language] || []), ...(preferredSpeakers.any || [])];
