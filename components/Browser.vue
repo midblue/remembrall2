@@ -206,9 +206,9 @@ export default {
         .filter(
           (card) =>
             !this.searchTerm ||
-            card.front.toLowerCase().indexOf(this.searchTerm.toLowerCase()) !==
+            card.front?.toLowerCase().indexOf(this.searchTerm.toLowerCase()) !==
               -1 ||
-            card.back.toLowerCase().indexOf(this.searchTerm.toLowerCase()) !==
+            card.back?.toLowerCase().indexOf(this.searchTerm.toLowerCase()) !==
               -1
         )
         .filter((card) => {

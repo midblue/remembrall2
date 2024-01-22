@@ -81,6 +81,26 @@ export default () => {
           })
           .catch(handleAxiosError)
       },
+
+      updateSetDataRaw(state, newData) {
+        const set = state.setList.find((s) => s.id === state.currentSetId)
+        if (!set) return
+        for (let key of Object.keys(newData)) {
+          Vue.set(set, key, newData[key])
+        }
+        // update set last updated
+        Vue.set(set, 'lastUpdated', Date.now())
+        const toSend = {
+          id: state.currentSetId,
+          lastUpdated: set.lastUpdated,
+        }
+        for (let key in Object.keys(newData)) toSend[key] = newData[key]
+
+        this.$axios
+          .post(`${apiUrl}/set/update/${state.currentUser}`, toSend)
+          .catch(handleAxiosError)
+      },
+
       updateSetSettings(state, newSettings) {
         for (const param in newSettings) {
           if (!state.setList.find((s) => s.id === state.currentSetId).settings)

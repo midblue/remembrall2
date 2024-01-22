@@ -69,6 +69,17 @@
         "
       />
 
+      <Toggle
+        key="doneMeansDone"
+        :setTo="settings.doneMeansDoneForDay"
+        label="Only study once per day (broken)"
+        @toggled="
+          updateSettings({
+            doneMeansDoneForDay: !(settings.doneMeansDoneForDay ? true : false),
+          })
+        "
+      />
+
       <select v-model="selectedLanguageTools" class="marright">
         <option v-for="(language, key) in languages" :key="key" :value="key">
           {{ language }}

@@ -160,6 +160,7 @@ export default {
       displayTimeMod: null,
       updatedCards: [],
       cardsToStudy: [],
+      lastHitDoneDate: null,
     }
   },
   computed: {
@@ -169,6 +170,11 @@ export default {
     currentSetId() {
       return this.$store.state.currentSetId
     },
+    currentSet() {
+      return this.$store.state.setList?.find(
+        (s) => s.id === this.$store.state.currentSetId
+      )
+    },
     settings() {
       return (
         this.$store.state.setList?.find(
@@ -177,14 +183,10 @@ export default {
       )
     },
     newToday() {
-      return this.$store.state.setList?.find(
-        (s) => s.id === this.$store.state.currentSetId
-      ).newToday
+      return this.currentSet.newToday
     },
     reviewsToday() {
-      return this.$store.state.setList?.find(
-        (s) => s.id === this.$store.state.currentSetId
-      ).reviewsToday
+      return this.currentSet.reviewsToday
     },
     doneForDay() {
       return this.doneReviewing && this.doneWithNewCards
@@ -273,8 +275,9 @@ export default {
     },
     nextReviewIn() {
       if (
-        this.settings.maxReviewsPerDay &&
-        this.reviewsToday >= this.settings.maxReviewsPerDay
+        (this.settings.maxReviewsPerDay &&
+          this.reviewsToday >= this.settings.maxReviewsPerDay) ||
+        this.settings.doneMeansDoneForDay
       )
         return 'a day'
       const reviewableCards = this.doneForDay
@@ -289,12 +292,14 @@ export default {
       return msToString(nextReview - Date.now())
     },
   },
+
   watch: {
     currentSetId() {
       this.toReview = []
       this.$nextTick(() => {
         this.refreshCards()
         this.startedWith = this.dueCards.length + this.newCards.length
+        this.lastHitDoneDate = this.currentSet.lastHitDoneDate
       })
     },
     cards() {
@@ -302,6 +307,18 @@ export default {
     },
     doneForDay(isDone) {
       if (isDone) {
+        this.$store.commit('updateSetDataRaw', {
+          lastHitDoneDate: Date.now(),
+        })
+        this.lastHitDoneDate = this.currentSet.lastHitDoneDate
+        //   // * skip if we should only study once and we've hit done for today
+        //   if (
+        //   this.settings.doneMeansDoneForDay &&
+        //   this.lastHitDoneDate !== undefined &&
+        //   new Date().getDay() !== new Date(this.lastHitDoneDate).getDay()
+        // ) {
+        //   return
+        // }
         window.scrollTo(0, 0)
         this.$nextTick(this.refreshCards)
         this.startedWith = 0

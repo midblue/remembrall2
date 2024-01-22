@@ -44,7 +44,7 @@ export default {
 
       const preferredSpeakers = {
         es: ['Google ', 'Paulina', 'Mónica'],
-        en: ['Google ', 'Samantha'],
+        en: ['Google ', 'Samantha', 'Karen', 'Daniel'],
         any: ['Google '],
       }
       const possibleSpeakerNames = [
